@@ -1,0 +1,119 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+export default function UserSettings({ userImage, onLogout }) {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const menuItemStyle = {
+    padding: '10px 0',
+    paddingLeft: '10px',
+    cursor: 'pointer',
+    position: 'relative',
+    borderRadius: '4px',
+    transition: 'background-color 0.2s ease',
+  };
+
+  const handleLogout = () => {
+    setOpen(false);
+
+    if (typeof onLogout === 'function') {
+      onLogout();
+    }
+
+    navigate('/authPage');
+  };
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        zIndex: 1000,
+      }}
+    >
+      <img
+        src={userImage}
+        alt="User"
+        style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '50%',
+          objectFit: 'cover',
+          border: 'none',
+          outline: 'none',
+          cursor: 'pointer',
+        }}
+        onClick={() => setOpen((v) => !v)}
+      />
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50px',
+            right: 0,
+            background: 'var(--menu-bg-dark)', //  or '#6bb3f7'
+            color: 'var(--menu-text)', // or 'white'
+            borderRadius: '8px',
+            padding: '10px',
+            boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
+            minWidth: '140px',
+          }}
+        >
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <li
+              style={menuItemStyle}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  'rgba(255,255,255,0.3)')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = 'transparent')
+              }
+            >
+              Profile
+            </li>
+            <li
+              style={menuItemStyle}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  'rgba(255,255,255,0.3)')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = 'transparent')
+              }
+            >
+              Settings
+            </li>
+            <li
+              style={menuItemStyle}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  'rgba(255,255,255,0.3)')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = 'transparent')
+              }
+            >
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: 'transparent',
+                  color: 'white',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  width: '100%',
+                  textAlign: 'left',
+                }}
+              >
+                Logout
+              </button>
+            </li>
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,171 @@
+body,
+button,
+input,
+textarea,
+select,
+label,
+a,
+p,
+span {
+  font-weight: 600;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 800;
+}
+
+@media (max-width: 480px) {
+  body,
+  button,
+  input,
+  textarea,
+  select,
+  label,
+  a,
+  p,
+  span {
+    font-weight: 600;
+  }
+}
+
+body.theme-boy {
+  --app-bg: #9dd0ff;
+  --accent: #57a7e6;
+  --menu-bg: #6bb3f7;
+  --menu-bg-dark: #5a9ad1;
+  --ui-contrast: #333;
+  --menu-text: #ffffff;
+}
+
+body.theme-girl {
+  --app-bg: #f7a6d0;
+  --accent: #f2a0cc;
+  --menu-bg: #f2b1d8;
+  --menu-bg-dark: #e085c1;
+  --ui-contrast: #4b3832;
+  --menu-text: #ffffff;
+}
+
+body.theme-boy,
+body.theme-girl {
+  background: var(--app-bg);
+  transition: background 260ms ease, color 260ms ease;
+}
+
+.theme-menu {
+  background: var(--menu-bg);
+  color: var(--menu-text);
+  transition: background 260ms ease, color 260ms ease;
+}
+
+.theme-menu-dark {
+  background: var(--menu-bg-dark);
+  color: var(--menu-text);
+  transition: background 260ms ease, color 260ms ease;
+}
+
+.page-root,
+.blog-page-root,
+.history-page-root {
+  background: transparent;
+}
+
+button:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: transparent;
+  overflow-x: hidden;
+}
+
+.app-container {
+  background: transparent;
+  min-height: 100vh;
+  color: var(--ui-contrast);
+}
+
+.page-content {
+  margin-left: 100px;
+  padding: 20px;
+  width: 100%;
+}
+
+.menu-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #007acc;
+  color: white;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 4px;
+  z-index: 1100;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -240px;
+  width: 200px;
+  height: 100%;
+  background: #005999;
+  color: white;
+  padding: 20px;
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+
+.side-menu.open {
+  left: 0;
+}
+
+textarea:focus,
+button:focus {
+  outline: none;
+}
+\ .custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #444;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #444;
+  border-radius: 6px;
+  margin: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 6px;
+  border: 1px solid #666;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #aaa;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:active {
+  background-color: #bbb;
+}
+
+.app-container {
+  background-color: var(--primary-color);
+  min-height: 100vh;
+}
