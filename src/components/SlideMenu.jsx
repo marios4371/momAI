@@ -1,7 +1,40 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 
-export default function SideMenu({ isOpen, toggleMenu }) {
+export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
   const location = useLocation();
+  const menuRef = useRef(null);
+  const btnRef = useRef(null);
+
+  // close out or ESC
+  useEffect(() => {
+    function onDocClick(e) {
+      if (!isOpen) return;
+      const target = e.target;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        btnRef.current &&
+        !btnRef.current.contains(target)
+      ) {
+        // for clicking outside
+        closeMenu && closeMenu();
+      }
+    }
+    function onKey(e) {
+      if (e.key === 'Escape' && isOpen) {
+        closeMenu && closeMenu();
+      }
+    }
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('touchstart', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('touchstart', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [isOpen, closeMenu]);
 
   const menuItemStyle = {
     padding: '10px 0',
@@ -21,6 +54,7 @@ export default function SideMenu({ isOpen, toggleMenu }) {
   return (
     <>
       <button
+        ref={btnRef}
         onClick={toggleMenu}
         style={{
           position: 'fixed',
@@ -40,6 +74,7 @@ export default function SideMenu({ isOpen, toggleMenu }) {
       </button>
 
       <div
+        ref={menuRef}
         className="theme-menu"
         style={{
           position: 'fixed',
@@ -47,8 +82,8 @@ export default function SideMenu({ isOpen, toggleMenu }) {
           left: isOpen ? '0' : '-200px',
           width: '200px',
           height: '100%',
-          background: 'var(--menu-bg-dark)', // or '#6bb3f7'
-          color: 'var(--menu-text)', // or 'white'
+          background: 'var(--menu-bg-dark)',
+          color: 'var(--menu-text)',
           padding: '20px',
           transition: 'left 0.3s ease',
           zIndex: 1000,
@@ -69,7 +104,7 @@ export default function SideMenu({ isOpen, toggleMenu }) {
             <>
               <li
                 style={menuItemStyle}
-                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.3)')}
+                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')}
                 onMouseLeave={(e) => handleHover(e, 'transparent')}
               >
                 <Link
@@ -82,7 +117,7 @@ export default function SideMenu({ isOpen, toggleMenu }) {
               </li>
               <li
                 style={menuItemStyle}
-                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.3)')}
+                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')}
                 onMouseLeave={(e) => handleHover(e, 'transparent')}
               >
                 <Link
@@ -97,42 +132,41 @@ export default function SideMenu({ isOpen, toggleMenu }) {
           )}
 
           {location.pathname === '/blog' && (
-            <li
-              style={menuItemStyle}
-              onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.3)')}
-              onMouseLeave={(e) => handleHover(e, 'transparent')}
-            >
-              <Link
-                to="/"
-                onClick={toggleMenu}
-                style={{ color: 'white', textDecoration: 'none' }}
+            <>
+              <li
+                style={menuItemStyle}
+                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')}
+                onMouseLeave={(e) => handleHover(e, 'transparent')}
               >
-                Mom AI
-              </Link>
-            </li>
-          )}
-
-          {location.pathname === '/blog' && (
-            <li
-              style={menuItemStyle}
-              onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.3)')}
-              onMouseLeave={(e) => handleHover(e, 'transparent')}
-            >
-              <Link
-                to="/history"
-                onClick={toggleMenu}
-                style={{ color: 'white', textDecoration: 'none' }}
+                <Link
+                  to="/"
+                  onClick={toggleMenu}
+                  style={{ color: 'white', textDecoration: 'none' }}
+                >
+                  Mom AI
+                </Link>
+              </li>
+              <li
+                style={menuItemStyle}
+                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')}
+                onMouseLeave={(e) => handleHover(e, 'transparent')}
               >
-                History
-              </Link>
-            </li>
+                <Link
+                  to="/history"
+                  onClick={toggleMenu}
+                  style={{ color: 'white', textDecoration: 'none' }}
+                >
+                  History
+                </Link>
+              </li>
+            </>
           )}
 
           {location.pathname === '/history' && (
             <>
               <li
                 style={menuItemStyle}
-                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.3)')}
+                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')}
                 onMouseLeave={(e) => handleHover(e, 'transparent')}
               >
                 <Link
@@ -145,7 +179,7 @@ export default function SideMenu({ isOpen, toggleMenu }) {
               </li>
               <li
                 style={menuItemStyle}
-                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.3)')}
+                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')}
                 onMouseLeave={(e) => handleHover(e, 'transparent')}
               >
                 <Link
