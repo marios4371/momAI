@@ -61,6 +61,7 @@ function CinemaCarousel() {
   );
 }
 
+
 export default function History() {
   return (
     <div className="cinema-only-root">
