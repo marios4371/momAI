@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function UserSettings({ userImage, onLogout }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-
+  const ref = useRef(null);
   const menuItemStyle = {
     padding: '10px 0',
     paddingLeft: '10px',
@@ -13,7 +13,6 @@ export default function UserSettings({ userImage, onLogout }) {
     borderRadius: '4px',
     transition: 'background-color 0.2s ease',
   };
-
   const handleLogout = () => {
     setOpen(false);
 
@@ -23,9 +22,26 @@ export default function UserSettings({ userImage, onLogout }) {
 
     navigate('/authPage');
   };
+  // onclick outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  });
 
   return (
     <div
+      ref={ref}
       style={{
         position: 'fixed',
         top: '20px',
