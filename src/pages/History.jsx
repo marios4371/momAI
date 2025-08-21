@@ -42,7 +42,7 @@ function CinemaCarousel() {
           <div key={index} className="cinema-slide">
             <div className="slide-content">
               <h2>History {2024 - index}</h2>
-              <p>Search your old memories...</p>
+              <p>Search and see your old memories...</p>
             </div>
           </div>
         ))}
