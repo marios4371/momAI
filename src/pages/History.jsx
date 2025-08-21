@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import './Blog.css';
+import './History.css';
 
-export default function History() {
+function CinemaCarousel() {
   const totalSlides = 3;
   const [currentIndex, setCurrentIndex] = useState(0);
   const trackRef = useRef(null);
@@ -36,27 +36,40 @@ export default function History() {
   };
 
   return (
-    <div className="cinema-only-root">
-      <div className="cinema-carousel-viewport" ref={viewportRef}>
-        <div className="cinema-carousel-track" ref={trackRef}>
-          {[...Array(totalSlides)].map((_, index) => (
-            <div key={index} className="cinema-slide">
-              <div className="slide-content">
-                <h2>History {2024 - index}</h2>
-                <p>Search your old memories...</p>
-              </div>
+    <div className="cinema-carousel-viewport" ref={viewportRef}>
+      <div className="cinema-carousel-track" ref={trackRef}>
+        {[...Array(totalSlides)].map((_, index) => (
+          <div key={index} className="cinema-slide">
+            <div className="slide-content">
+              <h2>History {2024 - index}</h2>
+              <p>Search your old memories...</p>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
 
-        <div className="carousel-indicators">
-          {[...Array(totalSlides)].map((_, index) => (
-            <div
-              key={index}
-              className={`indicator ${currentIndex === index ? 'active' : ''}`}
-              onClick={() => goToSlide(index)}
-            />
-          ))}
+      <div className="carousel-indicators">
+        {[...Array(totalSlides)].map((_, index) => (
+          <div
+            key={index}
+            className={`indicator ${currentIndex === index ? 'active' : ''}`}
+            onClick={() => goToSlide(index)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function History() {
+  return (
+    <div className="cinema-only-root">
+      <div className="carousel-top-line" />
+
+      <div className="page-content">
+        <div className="cinema-carousels-container left-shift">
+          <CinemaCarousel />
+          <CinemaCarousel />
         </div>
       </div>
     </div>
