@@ -93,9 +93,9 @@ export default function UserSettings({ userImage, onLogout }) {
                 navigate('/profile');
               }}
               role="menuitem"
-            >
-              <FiUser size={18} style={{ flex: '0 0 18px', color: 'inherit' }} />
+            >              
               <span style={{ color: 'inherit' }}>Profile</span>
+              <FiUser size={18} style={{ flex: '0 0 18px', color: 'inherit' }} />
             </li>
 
             <li
@@ -108,8 +108,9 @@ export default function UserSettings({ userImage, onLogout }) {
               }}
               role="menuitem"
             >
-              <FiSettings size={18} style={{ flex: '0 0 18px', color: 'inherit' }} />
+              
               <span style={{ color: 'inherit' }}>Settings</span>
+              <FiSettings size={18} style={{ flex: '0 0 18px', color: 'inherit' }} />
             </li>
 
             <li
@@ -133,9 +134,9 @@ export default function UserSettings({ userImage, onLogout }) {
                   gap: '10px',
                 }}
                 aria-label="Logout"
-              >
-                <FiLogOut size={18} style={{ flex: '0 0 18px', color: 'inherit' }} />
+              > 
                 <span style={{ color: 'inherit' }}>Logout</span>
+                <FiLogOut size={18} style={{ flex: '0 0 18px', color: 'inherit' }} />
               </button>
             </li>
           </ul>

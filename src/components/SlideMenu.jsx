@@ -130,6 +130,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
               </li>
             </>
           )}
+        
 
           {location.pathname === '/blog' && (
             <>
@@ -161,7 +162,6 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
               </li>
             </>
           )}
-
           {location.pathname === '/history' && (
             <>
               <li
@@ -192,8 +192,52 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
               </li>
             </>
           )}
+          {location.pathname ==='/upload' && (
+            <>
+            <li
+              style={menuItemStyle}
+              onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')}
+              onMouseLeave={(e) => handleHover(e, 'transparent')}
+            >
+              <Link
+                to="/"
+                onClick={toggleMenu}
+                style={{ color: 'white', textDecoration: 'none' }}
+              >
+                MomAi
+              </Link>
+            </li>
+            <li
+                style={menuItemStyle}
+                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')}
+                onMouseLeave={(e) => handleHover(e, 'transparent')}
+              >
+                <Link
+                  to="/blog"
+                  onClick={toggleMenu}
+                  style={{ color: 'white', textDecoration: 'none' }}
+                >
+                  Blog
+                </Link>
+              </li>
+              <li
+                style={menuItemStyle}
+                onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')}
+                onMouseLeave={(e) => handleHover(e, 'transparent')}
+              >
+                <Link
+                  to="/history"
+                  onClick={toggleMenu}
+                  style={{ color: 'white', textDecoration: 'none' }}
+                >
+                  History
+                </Link>
+              </li>
+            </>
+          )}
         </ul>
       </div>
     </>
   );
+  
 }

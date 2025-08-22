@@ -110,7 +110,7 @@ export default function Blog() {
               </Link>
             </li>
             <li>
-              <Link to="/blog" onClick={() => setRightOpen(false)}>
+              <Link to="/upload" onClick={() => setRightOpen(false)}>
                 Upload
               </Link>
             </li>
