@@ -105,7 +105,7 @@ export default function Blog() {
           <h3>Marios Kalogerakis</h3>
           <ul>
             <li>
-              <Link to="/" onClick={() => setRightOpen(false)}>
+              <Link to="/post" onClick={() => setRightOpen(false)}>
                 Posts
               </Link>
             </li>

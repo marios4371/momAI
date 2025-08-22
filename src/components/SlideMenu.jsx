@@ -192,7 +192,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
               </li>
             </>
           )}
-          {location.pathname ==='/upload' && (
+          {(location.pathname === '/upload' || location.pathname === './post') && (
             <>
             <li
               style={menuItemStyle}

@@ -9,6 +9,7 @@ import Blog from './pages/Blog.jsx';
 import AuthPage from './pages/AuthPage.jsx';
 import History from './pages/History';
 import Upload from './pages/Upload.jsx';
+import Post from './pages/Post.jsx';
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -92,6 +93,11 @@ function App() {
         <Route
         path ="/upload"
         element={isAuthenticated ? <Upload /> : <Navigate to ="/auth" replace />}
+        >
+        </Route>
+        <Route
+        path ="/post"
+        element={isAuthenticated ? <Post /> : <Navigate to ="/auth" replace />}
         >
         </Route>
         <Route
