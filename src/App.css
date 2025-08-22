@@ -169,3 +169,11 @@ button:focus {
   background-color: var(--primary-color);
   min-height: 100vh;
 }
+
+.user-menu {
+  color: #ffffff; /* force white */
+}
+
+.user-menu .menu-item {
+  color: inherit;
+}
