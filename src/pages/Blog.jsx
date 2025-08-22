@@ -114,11 +114,6 @@ export default function Blog() {
                 Upload
               </Link>
             </li>
-            <li>
-              <Link to="/auth" onClick={() => setRightOpen(false)}>
-                Settings
-              </Link>
-            </li>
           </ul>
         </div>
       </aside>

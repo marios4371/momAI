@@ -1,0 +1,10 @@
+.carousel-top-line {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: white;
+    z-index: 100;
+    opacity: 0.2;
+  }

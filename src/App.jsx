@@ -10,6 +10,7 @@ import AuthPage from './pages/AuthPage.jsx';
 import History from './pages/History';
 import Upload from './pages/Upload.jsx';
 import Post from './pages/Post.jsx';
+import Profile from './pages/Profile.jsx'
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -100,6 +101,12 @@ function App() {
         element={isAuthenticated ? <Post /> : <Navigate to ="/auth" replace />}
         >
         </Route>
+        <Route
+          path="/profile"
+          element={
+            isAuthenticated ? <Profile /> : <Navigate to="/auth" replace />
+          }
+        />        
         <Route
           path="*"
           element={<Navigate to={isAuthenticated ? '/' : '/auth'} replace />}
