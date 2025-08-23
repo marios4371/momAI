@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiUser, FiSettings, FiLogOut } from 'react-icons/fi';
+import './User.css';
 
 export default function UserSettings({ userImage, onLogout }) {
   const [open, setOpen] = useState(false);
@@ -93,9 +94,15 @@ export default function UserSettings({ userImage, onLogout }) {
                 navigate('/profile');
               }}
               role="menuitem"
-            >              
-              <span style={{ color: 'inherit' }}>Profile</span>
-              <FiUser size={18} style={{ flex: '0 0 18px', color: 'inherit' }} />
+            >
+              <span className="nav-label">Profile</span>
+                <span className="nav-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M4 21v-2a4 4 0 0 1 3-3.87"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </span>
             </li>
 
             <li
