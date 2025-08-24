@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import SideMenu from './components/SlideMenu.jsx';
 import ChatInput from './components/ChatInput';
@@ -14,32 +14,74 @@ import Profile from './pages/Profile.jsx';
 import { ConversationsProvider, useConversations } from './components/Conversation';
 
 function ChatArea() {
-  const { conversations, activeId, addMessage } = useConversations();
-  const active = conversations.find(c => c.id === activeId) ?? null;
+  const { conversations, activeId, sendUserMessage, resendAsUser, isBusy, selectConversation } = useConversations();
+  const active = conversations.find(c => c.id === activeId) ?? conversations[0] ?? null;
+  const [editingText, setEditingText] = useState('');
+  const [editingMsgId, setEditingMsgId] = useState(null);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (!active && conversations.length) selectConversation(conversations[0].id);
+  }, [active, conversations, selectConversation]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [active?.messages?.length, activeId]);
 
   const handleSend = (text) => {
-    if (!active) return;
-    addMessage(active.id, { id: Date.now(), text, from: 'user', ts: Date.now() });
+    if (editingMsgId) {
+      // send edited text as new user message
+      sendUserMessage(text);
+      setEditingMsgId(null);
+      setEditingText('');
+      return;
+    }
+    sendUserMessage(text);
+  };
+
+  const startEdit = (msg) => {
+    setEditingMsgId(msg.id);
+    setEditingText(msg.text);
+    // focus & populate input via initialText prop
+  };
+
+  const handleResend = (msg) => {
+    resendAsUser(active.id, msg.text);
   };
 
   return (
-    <div>
-      <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', width: '90%', maxWidth: '600px' }}>
-        <ChatInput onSend={handleSend} />
+    <>
+      <div style={{ position: 'fixed', top: '100px', left: '50%', transform: 'translateX(-50%)', width: '90%', maxWidth: 720, zIndex: 1300 }}>
+        <ChatInput onSend={handleSend} initialText={editingText} disabled={isBusy} onTextChange={() => {}} />
       </div>
 
-      <div style={{ position:'fixed', top: '100px', left:'50%', transform: 'translateX(-50%)', width:'90%', maxWidth:'600px', maxHeight: '60vh', overflowY:'auto', padding: 12 }}>
-        {active ? (
-          active.messages.map(m => (
-            <div key={m.id} style={{ marginBottom: 8, padding: 10, background: m.from === 'user' ? 'rgba(0,128,0,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
-              <div style={{ color: '#fff' }}>{m.text}</div>
-            </div>
-          ))
+      <div
+        ref={scrollRef}
+        className="messages-container"
+      >
+        {active && active.messages && active.messages.length ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {active.messages.map(m => (
+              <div key={m.id} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', justifyContent: m.from === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div style={{ maxWidth: '86%', background: m.from === 'user' ? 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04))' : 'rgba(255,255,255,0.03)', color: 'var(--text, #fff)', padding: '12px 14px', borderRadius: 12, fontSize: 16, lineHeight: 1.4, boxShadow: m.from === 'user' ? '0 6px 18px rgba(0,0,0,0.45)' : 'none', position: 'relative' }}>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>{m.text}</div>
+                </div>
+
+                {m.from === 'user' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <button title="Edit" onClick={() => startEdit(m)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', cursor: 'pointer' }}>✎</button>
+                    <button title="Resend" onClick={() => handleResend(m)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', cursor: 'pointer' }}>↺</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         ) : (
-          <div style={{ color: '#aaa' }}>No conversation selected</div>
+          <div style={{ height: 48 }} />
         )}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -66,27 +108,28 @@ function App() {
 
   return (
     <div className="app-container">
-      {isAuthenticated && (
+      {isAuthenticated ? (
         <ConversationsProvider>
           <SideMenu isOpen={menuOpen} toggleMenu={toggleMenu} closeMenu={closeMenu} />
           <UserSettings userImage={userPic} onLogout={() => { setIsAuthenticated(false); applyTheme('boy'); }} />
-        </ConversationsProvider>
-      )}
 
-      <Routes>
-        <Route path="/auth" element={<AuthPage setTheme={(t) => applyTheme(t)} onAuth={() => setIsAuthenticated(true)} />} />
-        <Route path="/history" element={isAuthenticated ? <History /> : <Navigate to="/auth" replace />} />
-        <Route path="/blog" element={isAuthenticated ? <Blog /> : <Navigate to="/auth" replace />} />
-        <Route path="/" element={isAuthenticated ? (
-          <ConversationsProvider>
-            <ChatArea />
-          </ConversationsProvider>
-        ) : <Navigate to="/auth" replace />} />
-        <Route path="/upload" element={isAuthenticated ? <Upload /> : <Navigate to="/auth" replace />} />
-        <Route path="/post" element={isAuthenticated ? <Post /> : <Navigate to="/auth" replace />} />
-        <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/auth" replace />} />
-        <Route path="*" element={<Navigate to={isAuthenticated ? '/' : '/auth'} replace />} />
-      </Routes>
+          <Routes>
+            <Route path="/auth" element={<AuthPage setTheme={(t) => applyTheme(t)} onAuth={() => setIsAuthenticated(true)} />} />
+            <Route path="/history" element={isAuthenticated ? <History /> : <Navigate to="/auth" replace />} />
+            <Route path="/blog" element={isAuthenticated ? <Blog /> : <Navigate to="/auth" replace />} />
+            <Route path="/" element={isAuthenticated ? <ChatArea /> : <Navigate to="/auth" replace />} />
+            <Route path="/upload" element={isAuthenticated ? <Upload /> : <Navigate to="/auth" replace />} />
+            <Route path="/post" element={isAuthenticated ? <Post /> : <Navigate to="/auth" replace />} />
+            <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/auth" replace />} />
+            <Route path="*" element={<Navigate to={isAuthenticated ? '/' : '/auth'} replace />} />
+          </Routes>
+        </ConversationsProvider>
+      ) : (
+        <Routes>
+          <Route path="/auth" element={<AuthPage setTheme={(t) => applyTheme(t)} onAuth={() => setIsAuthenticated(true)} />} />
+          <Route path="*" element={<Navigate to="/auth" replace />} />
+        </Routes>
+      )}
     </div>
   );
 }
