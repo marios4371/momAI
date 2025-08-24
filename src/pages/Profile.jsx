@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import "./Profile.css";
 
 export default function Profile() {
+  // #region user test info
   const [user, setUser] = useState({
     name: "Marios Kalogerakis",
     email: "marios@example.com",
