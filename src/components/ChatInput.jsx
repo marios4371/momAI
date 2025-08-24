@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-export default function ChatInput() {
+export default function ChatInput({ onSend }) {
   const [text, setText] = useState('');
   const textareaRef = useRef(null);
 
@@ -13,16 +13,28 @@ export default function ChatInput() {
     }
   }, [text]);
 
+  const submit = (e) => {
+    e?.preventDefault();
+    if (!text.trim()) return;
+    if (onSend) onSend(text.trim());
+    setText('');
+  };
+
   return (
-    <div
+    <form
+      onSubmit={submit}
+      className="chat-input"
       style={{
         width: '100%',
         maxWidth: '600px',
-        border: '1px solid gray',
         borderRadius: '20px',
         background: '#333',
         overflow: 'hidden',
-        padding: '2px',
+        padding: '8px 12px',
+        display: 'flex',
+        gap: 8,
+        alignItems: 'flex-end',
+        position: 'relative'
       }}
     >
       <textarea
@@ -37,18 +49,46 @@ export default function ChatInput() {
           resize: 'none',
           overflowY: 'auto',
           overflowX: 'hidden',
-          background: '#333',
+          background: 'transparent',
           color: 'white',
-          padding: '10px 16px 10px 12px',
+          padding: '10px 16px 40px 12px',
           border: 'none',
           outline: 'none',
           fontSize: '16px',
           lineHeight: '1.4',
-          borderRadius: '18px',
-          boxSizing: 'border-box',
+          borderRadius: '8px',
+          boxSizing: 'border-box'
         }}
         className="custom-scrollbar"
       />
-    </div>
+
+      {/* send button */}
+      <button
+        type="submit"
+        className="send-btn"
+        aria-label="Send"
+        style={{
+          position: 'absolute',
+          right: 27,
+          bottom: 10,
+          width: 40,
+          height: 40,
+          borderRadius: 20,
+          border: 'none',
+          background: 'rgba(255,255,255,0.12)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          padding: 0
+        }}
+      >
+        {/*arrow*/}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path d="M12 19V6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+          <path d="M5 12l7-7 7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
+        </svg>
+      </button>
+    </form>
   );
 }
