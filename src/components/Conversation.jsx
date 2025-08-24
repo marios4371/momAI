@@ -43,8 +43,23 @@ export function ConversationsProvider({ children }) {
     setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, messages: [...c.messages, msg] } : c)));
   }, []);
 
+  // new: allow removing a conversation
+  const removeConversation = useCallback((id) => {
+    setConversations((prev) => {
+      const next = prev.filter((c) => c.id !== id);
+      // if active was removed, set active to first conversation if exists
+      setActiveId((current) => {
+        if (current === id) {
+          return next[0]?.id ?? null;
+        }
+        return current;
+      });
+      return next;
+    });
+  }, []);
+
   return (
-    <Ctx.Provider value={{ conversations, activeId, newConversation, selectConversation, addMessage }}>
+    <Ctx.Provider value={{ conversations, activeId, newConversation, selectConversation, addMessage, removeConversation }}>
       {children}
     </Ctx.Provider>
   );

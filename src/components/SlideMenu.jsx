@@ -1,13 +1,32 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useConversations } from "./Conversation";
 
 export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
-  const { conversations, activeId, newConversation, selectConversation } = useConversations();
+  const { conversations, activeId, newConversation, selectConversation, removeConversation } = useConversations();
   const location = useLocation();
   const menuRef = useRef(null);
   const btnRef = useRef(null);
+  const navigate = useNavigate();
   const [momDropdown, setMomDropdown] = useState(false);
+
+  // delete
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  // per-conversation three-dots dropdown
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  const confirmDelete = (conv) => {
+    setDeleteTarget(conv);
+  };
+
+  const doDelete = () => {
+    if (!deleteTarget) return;
+    removeConversation(deleteTarget.id);
+    setDeleteTarget(null);
+  };
+
+  const cancelDelete = () => setDeleteTarget(null);
 
   // close out or ESC
   useEffect(() => {
@@ -21,11 +40,13 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
         !btnRef.current.contains(target)
       ) {
         closeMenu && closeMenu();
+        setOpenMenuId(null);
       }
     }
     function onKey(e) {
       if (e.key === 'Escape' && isOpen) {
         closeMenu && closeMenu();
+        setOpenMenuId(null);
       }
     }
     document.addEventListener('mousedown', onDocClick);
@@ -58,29 +79,35 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
         style={{ position: 'fixed', top: 0, left: isOpen ? '0' : '-200px', width: '200px', height: '100%', background: 'var(--menu-bg-dark)', color: 'var(--menu-text)', padding: '20px', transition: 'left 0.3s ease', zIndex: 1000, pointerEvents: isOpen ? 'auto' : 'none' }}
       >
         {/* MOM AI dropdown*/}
-        <h3
-          className={`mom-header ${location.pathname === '/' && momDropdown ? 'active' : ''}`}
-          onClick={() => { if (location.pathname === '/') setMomDropdown((v) => !v); }}
-          style={{ marginTop: '11px', marginLeft: '30px', fontWeight: 'bold', cursor: location.pathname === '/' ? 'pointer' : 'default' }}
-        >
-          MOM AI
-        </h3>
-
-        {/* dropdown content */}
-        {location.pathname === '/' && momDropdown && (
-          <div style={{ marginTop: 8, marginLeft: 6 }}>
-            <button
-              className="btn new-advice"
-              onClick={(e) => {
-                e.stopPropagation();
-                const conv = newConversation();
-                window.location.reload();
-              }}
-              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '6px 8px', borderRadius: 6, cursor: 'pointer' }}
+        {isOpen && (
+          <>
+            <h3
+              className={`mom-header ${(location.pathname === '/blog' || location.pathname === '/history' || location.pathname === '/upload' || location.pathname === '/post' || location.pathname === '/profile' || location.pathname === '/' ) && momDropdown ? 'active' : ''}`}
+              onClick={() => { if (location.pathname === '/blog' || location.pathname === '/history' || location.pathname === '/upload' || location.pathname === '/post' || location.pathname === '/profile' || location.pathname === '/' ) setMomDropdown((v) => !v); }}
+              style={{ marginTop: '11px', marginLeft: '30px', fontWeight: 'bold', cursor: (location.pathname === '/blog' || location.pathname === '/history' || location.pathname === '/upload' || location.pathname === '/post' || location.pathname === '/profile' || location.pathname === '/' ) ? 'pointer' : 'default' }}
             >
-              + New Advice
-            </button>
-          </div>
+              MOM AI
+            </h3>
+
+            {/* dropdown content */}
+            {(location.pathname === '/blog' || location.pathname === '/history' || location.pathname === '/upload' || location.pathname === '/post' || location.pathname === '/profile' || location.pathname === '/' )&& momDropdown && (
+              <div style={{ marginTop: 8, marginLeft: 6 }}>
+                <button
+                  className="btn new-advice"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const conv = newConversation();
+                    setMomDropdown(false);
+                    closeMenu && closeMenu();
+                    navigate('/');
+                  }}
+                  style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '6px 8px', borderRadius: 6, cursor: 'pointer' }}
+                >
+                  + New Advice
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
@@ -127,7 +154,60 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
                   title={c.title}
                 >
                   <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>{c.title}</div>
-                  <div style={{ fontSize: 12, opacity: 0.85 }}>{(c.messages?.length || 0)}</div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {/* three-dots button opens small dropdown */}
+                    <div style={{ position: 'relative' }}>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setOpenMenuId((id) => (id === c.id ? null : c.id)); }}
+                        title="More"
+                        aria-label={`More options for ${c.title}`}
+                        style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', cursor: 'pointer', padding: 6, marginLeft: 8 }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <circle cx="12" cy="5" r="1.5"></circle>
+                          <circle cx="12" cy="12" r="1.5"></circle>
+                          <circle cx="12" cy="19" r="1.5"></circle>
+                        </svg>
+                      </button>
+
+                      {openMenuId === c.id && (
+                        <div
+                          role="menu"
+                          style={{
+                            position: 'absolute',
+                            right: 0,
+                            top: 28,
+                            background: 'rgba(40,40,44,0.96)',
+                            borderRadius: 8,
+                            padding: 6,
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+                            minWidth: 120,
+                            zIndex: 1500
+                          }}
+                        >
+                          {/* bin */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuId(null);
+                              confirmDelete(c);
+                              closeMenu && closeMenu();
+                            }}
+                            style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%', background: 'transparent', border: 'none', color: 'white', padding: '8px', cursor: 'pointer', borderRadius: 6 }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                              <path d="M10 11v6"></path>
+                              <path d="M14 11v6"></path>
+                            </svg>
+                            <span style={{ fontSize: 14 }}>Delete</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -135,6 +215,45 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
         )}
 
       </div>
+
+      {deleteTarget && (
+        <div
+          className="delete-modal-overlay"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000
+          }}
+          onClick={cancelDelete}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: 360,
+              maxWidth: '92%',
+              background: 'linear-gradient(180deg, #2f2f32, #232425)',
+              color: 'white',
+              padding: 18,
+              borderRadius: 10,
+              boxShadow: '0 12px 36px rgba(0,0,0,0.6)',
+              textAlign: 'center'
+            }}
+          >
+            <div style={{ marginBottom: 12, fontWeight: 700 }}>Delete Conversation</div>
+            <div style={{ color: 'rgba(255,255,255,0.85)', marginBottom: 18 }}>{`Are you sure about deleting this conversation? "${deleteTarget.title}" ;`}</div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button onClick={cancelDelete} className="btn ghost" style={{ padding: '8px 12px' }}>No</button>
+              <button onClick={() => { doDelete(); }} className="btn" style={{ padding: '8px 12px' }}>Yes</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 
