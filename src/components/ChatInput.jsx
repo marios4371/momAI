@@ -29,6 +29,13 @@ export default function ChatInput({ onSend, initialText = '' }) {
     setText('');
   };
 
+  const onEnterSend = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
+  };
+
   return (
     <form
       onSubmit={submit}
@@ -52,6 +59,7 @@ export default function ChatInput({ onSend, initialText = '' }) {
         ref={textareaRef}
         value={text}
         onChange={(e) => setText(e.target.value)}
+        onKeyDown={onEnterSend}
         placeholder="Become a better mom"
         style={{
           width: '100%',
