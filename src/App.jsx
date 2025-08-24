@@ -10,7 +10,39 @@ import AuthPage from './pages/AuthPage.jsx';
 import History from './pages/History';
 import Upload from './pages/Upload.jsx';
 import Post from './pages/Post.jsx';
-import Profile from './pages/Profile.jsx'
+import Profile from './pages/Profile.jsx';
+import { ConversationsProvider, useConversations } from './components/Conversation';
+
+function ChatArea() {
+  const { conversations, activeId, addMessage } = useConversations();
+  const active = conversations.find(c => c.id === activeId) ?? null;
+
+  const handleSend = (text) => {
+    if (!active) return;
+    addMessage(active.id, { id: Date.now(), text, from: 'user', ts: Date.now() });
+  };
+
+  return (
+    <div>
+      <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', width: '90%', maxWidth: '600px' }}>
+        <ChatInput onSend={handleSend} />
+      </div>
+
+      <div style={{ position:'fixed', top: '100px', left:'50%', transform: 'translateX(-50%)', width:'90%', maxWidth:'600px', maxHeight: '60vh', overflowY:'auto', padding: 12 }}>
+        {active ? (
+          active.messages.map(m => (
+            <div key={m.id} style={{ marginBottom: 8, padding: 10, background: m.from === 'user' ? 'rgba(0,128,0,0.08)' : 'rgba(255,255,255,0.03)', borderRadius: 8 }}>
+              <div style={{ color: '#fff' }}>{m.text}</div>
+            </div>
+          ))
+        ) : (
+          <div style={{ color: '#aaa' }}>No conversation selected</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -35,82 +67,25 @@ function App() {
   return (
     <div className="app-container">
       {isAuthenticated && (
-        <SideMenu
-          isOpen={menuOpen}
-          toggleMenu={toggleMenu}
-          closeMenu={closeMenu}
-        />
+        <ConversationsProvider>
+          <SideMenu isOpen={menuOpen} toggleMenu={toggleMenu} closeMenu={closeMenu} />
+          <UserSettings userImage={userPic} onLogout={() => { setIsAuthenticated(false); applyTheme('boy'); }} />
+        </ConversationsProvider>
       )}
-      {isAuthenticated && (
-        <UserSettings
-          userImage={userPic}
-          onLogout={() => {
-            setIsAuthenticated(false);
-            applyTheme('boy');
-          }}
-        />
-      )}
+
       <Routes>
-        <Route
-          path="/auth"
-          element={
-            <AuthPage
-              setTheme={(t) => applyTheme(t)}
-              onAuth={() => setIsAuthenticated(true)}
-            />
-          }
-        />
-        <Route
-          path="/history"
-          element={
-            isAuthenticated ? <History /> : <Navigate to="/auth" replace />
-          }
-        />
-        <Route
-          path="/blog"
-          element={isAuthenticated ? <Blog /> : <Navigate to="/auth" replace />}
-        />
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <div
-                style={{
-                  position: 'fixed',
-                  top: '20px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '90%',
-                  maxWidth: '600px',
-                }}
-              >
-                <ChatInput />
-              </div>
-            ) : (
-              <Navigate to="/auth" replace />
-            )
-          }
-        />
-        <Route
-        path ="/upload"
-        element={isAuthenticated ? <Upload /> : <Navigate to ="/auth" replace />}
-        >
-        </Route>
-        <Route
-        path ="/post"
-        element={isAuthenticated ? <Post /> : <Navigate to ="/auth" replace />}
-        >
-        </Route>
-        <Route
-          path="/profile"
-          element={
-            isAuthenticated ? <Profile /> : <Navigate to="/auth" replace />
-          }
-        />        
-        <Route
-          path="*"
-          element={<Navigate to={isAuthenticated ? '/' : '/auth'} replace />}
-        />
+        <Route path="/auth" element={<AuthPage setTheme={(t) => applyTheme(t)} onAuth={() => setIsAuthenticated(true)} />} />
+        <Route path="/history" element={isAuthenticated ? <History /> : <Navigate to="/auth" replace />} />
+        <Route path="/blog" element={isAuthenticated ? <Blog /> : <Navigate to="/auth" replace />} />
+        <Route path="/" element={isAuthenticated ? (
+          <ConversationsProvider>
+            <ChatArea />
+          </ConversationsProvider>
+        ) : <Navigate to="/auth" replace />} />
+        <Route path="/upload" element={isAuthenticated ? <Upload /> : <Navigate to="/auth" replace />} />
+        <Route path="/post" element={isAuthenticated ? <Post /> : <Navigate to="/auth" replace />} />
+        <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/auth" replace />} />
+        <Route path="*" element={<Navigate to={isAuthenticated ? '/' : '/auth'} replace />} />
       </Routes>
     </div>
   );

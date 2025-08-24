@@ -1,15 +1,20 @@
-body,
-button,
-input,
-textarea,
-select,
-label,
-a,
-p,
-span {
-  font-weight: 600;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+/* global font */
+:root{
+  --app-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* apply font everywhere on the app */
+html, body,
+button, input, textarea, select, label, a, p, span {
+  font-family: var(--app-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400; /* default */
+}
+
+/* heavier headings */
 h1,
 h2,
 h3,
@@ -20,16 +25,9 @@ h6 {
 }
 
 @media (max-width: 480px) {
-  body,
-  button,
-  input,
-  textarea,
-  select,
-  label,
-  a,
-  p,
-  span {
-    font-weight: 600;
+  html, body,
+  button, input, textarea, select, label, a, p, span {
+    font-weight: 400;
   }
 }
 
@@ -62,6 +60,22 @@ body.theme-girl {
   color: var(--menu-text);
   transition: background 260ms ease, color 260ms ease;
 }
+.theme-menu .mom-header{
+  padding: 8px 8px;
+  border-radius: 6px;
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+  color: var(--menu-text);
+  user-select: none;
+  display: inline-block;
+}
+.theme-menu .mom-header:hover{
+  background: rgba(255,255,255,0.03);
+  transform: translateX(4px);
+}
+.theme-menu .mom-header.active{
+  background: rgba(255,255,255,0.06);
+  transform: none;
+}
 
 .theme-menu-dark {
   background: var(--menu-bg-dark);
@@ -84,15 +98,15 @@ textarea:focus {
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
   background: transparent;
   overflow-x: hidden;
+  color: var(--ui-contrast, #000);
 }
 
 .app-container {
   background: transparent;
   min-height: 100vh;
-  color: var(--ui-contrast);
+  color: var(--ui-contrast, #000);
 }
 
 .page-content {
@@ -136,7 +150,8 @@ textarea:focus,
 button:focus {
   outline: none;
 }
-\ .custom-scrollbar {
+
+.custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #888 #444;
 }
@@ -166,12 +181,12 @@ button:focus {
 }
 
 .app-container {
-  background-color: var(--primary-color);
+  background-color: var(--primary-color, transparent);
   min-height: 100vh;
 }
 
 .user-menu {
-  color: #ffffff; /* force white */
+  color: #ffffff;
 }
 
 .user-menu .menu-item {
