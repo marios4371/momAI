@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
+import { useConversations } from './Conversation';
 
-export default function ChatInput({ onSend }) {
-  const [text, setText] = useState('');
+export default function ChatInput({ onSend, initialText = '' }) {
+  const { activeId } = useConversations();
+  const [text, setText] = useState(initialText || '');
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -11,7 +13,14 @@ export default function ChatInput({ onSend }) {
       const maxHeight = 150;
       ta.style.height = Math.min(ta.scrollHeight, maxHeight) + 'px';
     }
-  }, [text]);
+    if (typeof onTextChange === 'function') onTextChange(text);
+    }, [text]);
+
+  useEffect(() => {
+    // when active conversation changes, reset to initialText (usually empty) and focus
+    setText(initialText || '');
+    try { textareaRef.current && textareaRef.current.focus(); } catch (e) {}
+  }, [activeId, initialText]);
 
   const submit = (e) => {
     e?.preventDefault();
@@ -25,6 +34,8 @@ export default function ChatInput({ onSend }) {
       onSubmit={submit}
       className="chat-input"
       style={{
+        top: '-70px',
+        left: '10%',
         width: '100%',
         maxWidth: '600px',
         borderRadius: '20px',

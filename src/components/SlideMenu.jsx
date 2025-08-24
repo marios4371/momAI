@@ -97,9 +97,14 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
                   onClick={(e) => {
                     e.stopPropagation();
                     const conv = newConversation();
+                    // ensure active selection is applied
+                    try { if (conv?.id) selectConversation(conv.id); } catch {}
                     setMomDropdown(false);
                     closeMenu && closeMenu();
-                    navigate('/');
+                    // navigate after a tiny delay so provider state updates take effect
+                    setTimeout(() => {
+                      navigate('/');
+                    }, 50);
                   }}
                   style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '6px 8px', borderRadius: 6, cursor: 'pointer' }}
                 >
