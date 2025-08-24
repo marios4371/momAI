@@ -54,7 +54,7 @@
 }
 .profile-table{
   display: grid;
-  grid-template-columns: 240px 1fr; /* πιο compact, focus στο περιεχόμενο */
+  grid-template-columns: 240px 1fr;
   gap: 0;
   width: min(96%, var(--max-width));
   min-height: var(--card-min-height);
@@ -62,11 +62,8 @@
   border-radius: 14px;
   overflow: hidden;
 
-  /* πιο σαφές γκρι box: χρήση των μεταβλητών card-start / card-end */
   background: linear-gradient(180deg, var(--card-start), var(--card-end));
-  /* πιο καθαρό περίγραμμα για αντίθεση με το background */
   border: 1px solid rgba(255,255,255,0.04);
-  /* ισχυρότερη, αλλά απαλή σκίαση */
   box-shadow:
     0 24px 60px rgba(2,6,23,0.65),
     inset 0 1px 0 rgba(255,255,255,0.02);
@@ -75,7 +72,6 @@
   transform: translateZ(0);
 }
 
-/* profile header inside left column */
 .profile-header{
   display:flex;
   align-items:center;
@@ -102,7 +98,7 @@
 .left-title{ font-size:0.82rem; color:var(--muted); }
 .left-col{
   padding: 0 24px 20px 20px;
-  border-right: 1px solid rgba(255,255,255,0.06); /* vertical line */
+  border-right: 1px solid rgba(255,255,255,0.06);
   box-sizing: border-box;
 }
 .left-col ul{
@@ -112,13 +108,13 @@
 }
 .left-col li{
   padding: 12px 10px;
-  color: var(--text); /* τώρα λευκό/κεντρικό χρώμα */
+  color: var(--text);
   border-radius: 8px;
   margin-bottom: 8px;
   cursor: pointer;
   transition: background 160ms ease, color 160ms ease, transform 120ms ease;
   user-select: none;
-  font-weight: 800; /* πιο έντονη γραμματοσειρά */
+  font-weight: 800;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -235,7 +231,7 @@
 .modal-overlay{
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.36); /* soft dark backdrop */
+  background: rgba(0,0,0,0.36);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -316,7 +312,7 @@
 }
 .see-profile-btn:hover{ transform: translateY(-2px); }
 
-/* Preview modal (public view) */
+/* Public preview */
 .preview-overlay{
   position: fixed;
   inset: 0;

@@ -19,8 +19,8 @@ export default function Profile() {
     { id: 1, school: "Univ. of Athens", degree: "MSc Computer Science" },
   ]);
 
-  const [selected, setSelected] = useState("userInfo"); // 'userInfo' | 'credits' | 'social' | 'education' | 'help'
-  const [editing, setEditing] = useState(null); // { type, id? }
+  const [selected, setSelected] = useState("userInfo");
+  const [editing, setEditing] = useState(null);
   const [formValues, setFormValues] = useState({});
   const lineRef = useRef(null);
 
@@ -79,7 +79,7 @@ export default function Profile() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const closePreview = () => setPreviewOpen(false);
 
-  // Render helpers
+  // helpers
   const RightPanel = () => {
     if (selected === "help") {
       return (
@@ -429,7 +429,7 @@ export default function Profile() {
 
             <footer className="preview-actions">
               <button className="btn ghost" onClick={closePreview}>Close</button>
-              <button className="btn" onClick={() => { /* place to open public link if exists */ }}>Open public view</button>
+              <button className="btn" onClick={() => { /* if i want redirect to public window */ }}>Open public view</button>
             </footer>
           </div>
         </div>
