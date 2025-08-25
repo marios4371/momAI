@@ -134,8 +134,6 @@ function App() {
           <UserSettings userImage={userPic} onLogout={() => { setIsAuthenticated(false); applyTheme('boy'); }} />
 
           <Routes>
-            {/* ΣΗΜΕΙΩΣΗ: στο auth route αλλάζουμε το onAuth έτσι ώστε όταν το AuthPage καλεί onAuth,
-                να ενεργοποιήσει και το resetActiveOnEntry */}
             <Route path="/auth" element={<AuthPage setTheme={(t) => applyTheme(t)} onAuth={() => { setResetActiveOnEntry(true); setIsAuthenticated(true); }} />} />
             <Route path="/history" element={isAuthenticated ? <History /> : <Navigate to="/auth" replace />} />
             <Route path="/blog" element={isAuthenticated ? <Blog /> : <Navigate to="/auth" replace />} />
