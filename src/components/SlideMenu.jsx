@@ -86,7 +86,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
               onClick={() => { if (location.pathname === '/blog' || location.pathname === '/history' || location.pathname === '/upload' || location.pathname === '/post' || location.pathname === '/profile' || location.pathname === '/' ) setMomDropdown((v) => !v); }}
               style={{ marginTop: '11px', marginLeft: '30px', fontWeight: 'bold', cursor: (location.pathname === '/blog' || location.pathname === '/history' || location.pathname === '/upload' || location.pathname === '/post' || location.pathname === '/profile' || location.pathname === '/' ) ? 'pointer' : 'default' }}
             >
-              MOM AI
+              ParentAI
             </h3>
 
             {/* dropdown content */}
@@ -130,7 +130,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
           {(location.pathname === '/blog') && (
             <>
               <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
-                <Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>MomAi</Link>
+                <Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>ParentAI</Link>
               </li>
               <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
                 <Link to="/history" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>History</Link>
@@ -141,7 +141,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
           {(location.pathname === '/history') && (
             <>
               <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
-                <Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>MomAi</Link>
+                <Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>ParentAI</Link>
               </li>
               <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
                 <Link to="/blog" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>Blog</Link>
@@ -152,7 +152,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
           {(location.pathname === '/upload' || location.pathname === '/post' || location.pathname === '/profile') && (
             <>
               <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
-                <Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>MomAi</Link>
+                <Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>ParentAI</Link>
               </li>
               <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
                 <Link to="/blog" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>Blog</Link>

@@ -60,7 +60,7 @@ export default function ChatInput({ onSend, initialText = '' }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={onEnterSend}
-        placeholder="Become a better mom"
+        placeholder="Become a better parent"
         style={{
           width: '100%',
           minHeight: '50px',
