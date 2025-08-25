@@ -14,15 +14,32 @@ import Profile from './pages/Profile.jsx';
 import { ConversationsProvider, useConversations } from './components/Conversation';
 
 function ChatArea() {
-  const { conversations, activeId, sendUserMessage, resendAsUser, isBusy, selectConversation } = useConversations();
+  const { conversations, activeId, sendUserMessage, resendAsUser, isBusy, selectConversation, suppressAutoSelect } = useConversations();
   const active = conversations.find(c => c.id === activeId) ?? conversations[0] ?? null;
   const [editingText, setEditingText] = useState('');
   const [editingMsgId, setEditingMsgId] = useState(null);
   const scrollRef = useRef(null);
+  const mountedRef = useRef(false);
+  const prevConvLenRef = useRef(conversations.length);
 
   useEffect(() => {
-    if (!active && conversations.length) selectConversation(conversations[0].id);
-  }, [active, conversations, selectConversation]);
+    // skip first render logic (we don't force-select on mount)
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      prevConvLenRef.current = conversations.length;
+      return;
+    }
+
+    // if there's no active conversation and suppressAutoSelect is false,
+    // only auto-select when conversations length has increased (new conv created)
+    if (!active && conversations.length && !suppressAutoSelect) {
+      if (conversations.length > prevConvLenRef.current) {
+        selectConversation(conversations[0].id);
+      }
+    }
+
+    prevConvLenRef.current = conversations.length;
+  }, [active, conversations, selectConversation, suppressAutoSelect]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -92,6 +109,8 @@ function App() {
   const toggleMenu = () => setMenuOpen((v) => !v);
   const closeMenu = () => setMenuOpen(false);
 
+  const [resetActiveOnEntry, setResetActiveOnEntry] = useState(false);
+
   const applyTheme = useCallback((t) => {
     setTheme(t);
     try {
@@ -109,12 +128,15 @@ function App() {
   return (
     <div className="app-container">
       {isAuthenticated ? (
-        <ConversationsProvider>
+        // ΠΕΡΝΑΜΕ την προτίμηση στο provider
+        <ConversationsProvider resetActiveOnMount={resetActiveOnEntry}>
           <SideMenu isOpen={menuOpen} toggleMenu={toggleMenu} closeMenu={closeMenu} />
           <UserSettings userImage={userPic} onLogout={() => { setIsAuthenticated(false); applyTheme('boy'); }} />
 
           <Routes>
-            <Route path="/auth" element={<AuthPage setTheme={(t) => applyTheme(t)} onAuth={() => setIsAuthenticated(true)} />} />
+            {/* ΣΗΜΕΙΩΣΗ: στο auth route αλλάζουμε το onAuth έτσι ώστε όταν το AuthPage καλεί onAuth,
+                να ενεργοποιήσει και το resetActiveOnEntry */}
+            <Route path="/auth" element={<AuthPage setTheme={(t) => applyTheme(t)} onAuth={() => { setResetActiveOnEntry(true); setIsAuthenticated(true); }} />} />
             <Route path="/history" element={isAuthenticated ? <History /> : <Navigate to="/auth" replace />} />
             <Route path="/blog" element={isAuthenticated ? <Blog /> : <Navigate to="/auth" replace />} />
             <Route path="/" element={isAuthenticated ? <ChatArea /> : <Navigate to="/auth" replace />} />
