@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router";
 import { useState } from 'react';
 import './Upload.css';
 
 export default function Upload() {
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState('post');
   const [postContent, setPostContent] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -174,6 +176,13 @@ export default function Upload() {
           </section>
         </main>
       </div>
+      <button
+      className="see-posts-btn"
+      onClick={() => navigate('/post')}
+      aria-haspopup="dialog"
+      >
+        See Posts
+      </button>
     </div>
   );
 }

@@ -124,7 +124,23 @@
   .btn:hover {
     background: rgba(255,255,255,0.09);
   }
-  
+
+  .see-posts-btn{
+    position: fixed;
+    right: 20px;
+    bottom: 22px;
+    z-index: 1400;
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(2,6,23,0.45);
+  }
+  .see-posts-btn:hover{ transform: translateY(-2px); }
+
   /* Responsive Design */
   @media (max-width: 880px) {
     .upload-table {
