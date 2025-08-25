@@ -127,7 +127,29 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
             </>
           )}
 
-          {(location.pathname === '/blog' || location.pathname === '/history' || location.pathname === '/upload' || location.pathname === '/post' || location.pathname === '/profile') && (
+          {(location.pathname === '/blog') && (
+            <>
+              <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
+                <Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>MomAi</Link>
+              </li>
+              <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
+                <Link to="/history" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>History</Link>
+              </li>
+            </>
+          )}
+
+          {(location.pathname === '/history') && (
+            <>
+              <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
+                <Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>MomAi</Link>
+              </li>
+              <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
+                <Link to="/blog" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>Blog</Link>
+              </li>
+            </>
+          )}
+
+          {(location.pathname === '/upload' || location.pathname === '/post' || location.pathname === '/profile') && (
             <>
               <li style={menuItemStyle} onMouseEnter={(e) => handleHover(e, 'rgba(255,255,255,0.08)')} onMouseLeave={(e) => handleHover(e, 'transparent')}>
                 <Link to="/" onClick={toggleMenu} style={{ color: 'white', textDecoration: 'none' }}>MomAi</Link>
@@ -140,6 +162,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
               </li>
             </>
           )}
+
         </ul>
 
         {location.pathname === '/' && (
