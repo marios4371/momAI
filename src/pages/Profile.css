@@ -395,3 +395,61 @@
   .preview-box{ width: 94%; }
   .preview-avatar{ width:56px; height:56px; }
 }
+
+
+.profile-root .actions button,
+.profile-root .listactions button,
+.profile-root .listactions .btn,
+.profile-root .listactions .danger,
+.profile-root .row .actions button,
+.profile-root .add-row button,
+.profile-root .btn,
+.profile-root .btn.ghost {
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,0.04) !important; /* neutral thin border */
+  color: var(--muted) !important;                         /* grey text by default */
+  box-shadow: none !important;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+}
+
+/* remove explicit "danger" red styling */
+.profile-root .listactions .danger {
+  border-color: rgba(255,255,255,0.04) !important;
+  color: var(--muted) !important;
+  background: transparent !important;
+}
+
+/* hover: same highlight behaviour as left nav items (subtle light bg + white text) */
+.profile-root .actions button:hover,
+.profile-root .listactions button:hover,
+.profile-root .btn:hover,
+.profile-root .btn.ghost:hover,
+.profile-root .add-row button:hover {
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  transform: translateY(-2px); /* subtle lift */
+}
+
+/* anchors that look like buttons (help/billing links) */
+.profile-root a.btn,
+.profile-root a.btn.ghost {
+  color: var(--muted);
+  border: 1px solid rgba(255,255,255,0.04);
+  background: transparent;
+  text-decoration: none;
+}
+.profile-root a.btn:hover,
+.profile-root a.btn.ghost:hover {
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+}
+
+/* optional: slightly smaller / tighter look for inline list action buttons */
+.profile-root .listactions button {
+  padding: 6px 8px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
