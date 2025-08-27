@@ -15,7 +15,7 @@ import { ConversationsProvider, useConversations } from './components/Conversati
 
 function ChatArea() {
   const { conversations, activeId, sendUserMessage, resendAsUser, isBusy, selectConversation, suppressAutoSelect } = useConversations();
-  const active = conversations.find(c => c.id === activeId) ?? conversations[0] ?? null;
+  const active = conversations.find(c => c.id === activeId) ?? null;
   const [editingText, setEditingText] = useState('');
   const [editingMsgId, setEditingMsgId] = useState(null);
   const scrollRef = useRef(null);
