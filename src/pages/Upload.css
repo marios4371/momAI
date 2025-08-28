@@ -57,13 +57,37 @@
     color: var(--text);
     font-family: inherit;
     box-sizing: border-box;
+   font-size: 16px;
+   line-height: 1.5;
+   transition: all 0.2s ease;
+   resize: vertical;
+   min-height: 120px;
   }
   
+ .form-group textarea {
+   min-height: 180px;
+   max-height: 400px;
+ }
+
+ .form-group textarea[rows="6"] {
+   min-height: 200px;
+ }
+
+ .form-group textarea[rows="4"] {
+   min-height: 150px;
+ }
+
+ .form-group textarea[rows="3"] {
+   min-height: 120px;
+ }
+
   .form-group textarea:focus,
   .form-group input[type="text"]:focus {
     outline: none;
     border-color: rgba(255,255,255,0.08);
     background: rgba(255,255,255,0.04);
+   transform: translateY(-1px);
+   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
 
 .form-group textarea::placeholder,
