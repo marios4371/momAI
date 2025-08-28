@@ -174,7 +174,7 @@ export default function AuthPage({ onAuth, setTheme }) {
                   fontWeight: 600,
                 }}
               >
-                Welcome to momAI
+                Welcome to parentAI
               </Typography>
               <br />
               <br />
