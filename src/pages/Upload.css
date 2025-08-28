@@ -1,6 +1,4 @@
 :root {
-    --light-gray: #f0f0f0;
-    --light-gray-focus: #e0e0e0;
   }
   
 .upload-root {
@@ -54,9 +52,9 @@
     width: 100%;
     padding: 12px;
     border-radius: 8px;
-    background: var(--light-gray); /* Changed to light gray */
-    border: 1px solid rgba(0, 0, 0, 0.1); /* Darker border for better contrast */
-    color: #000; /* Black text for better readability */
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
     font-family: inherit;
     box-sizing: border-box;
   }
@@ -64,8 +62,8 @@
   .form-group textarea:focus,
   .form-group input[type="text"]:focus {
     outline: none;
-    border-color: rgba(0, 0, 0, 0.3);
-    background: var(--light-gray-focus); /* Slightly darker gray on focus */
+    border-color: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
   }
 
 .form-group textarea::placeholder,
