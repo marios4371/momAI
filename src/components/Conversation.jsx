@@ -127,7 +127,7 @@ export function ConversationsProvider({ children, resetActiveOnMount = false }) 
     addMessage(activeId, userMsg);
     setIsBusy(true);
     setTimeout(() => {
-      const botMsg = { id: Date.now()+1, text: `AI reply to: "${text}"`, from: 'bot', ts: Date.now() };
+      const botMsg = { id: Date.now()+1, text: `parentAI replies: "${text}"`, from: 'bot', ts: Date.now() };
       addMessage(activeId, botMsg);
       setIsBusy(false);
     }, 1400);
@@ -139,7 +139,7 @@ export function ConversationsProvider({ children, resetActiveOnMount = false }) 
     addMessage(convId, userMsg);
     setIsBusy(true);
     setTimeout(() => {
-      const botMsg = { id: Date.now()+1, text: `AI reply to: "${text}"`, from: 'bot', ts: Date.now() };
+      const botMsg = { id: Date.now()+1, text: `parentAI reply to: "${text}"`, from: 'bot', ts: Date.now() };
       addMessage(convId, botMsg);
       setIsBusy(false);
     }, 1400);

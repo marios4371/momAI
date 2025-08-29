@@ -78,7 +78,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
         className="theme-menu"
         style={{ position: 'fixed', top: 0, left: isOpen ? '0' : '-200px', width: '200px', height: '100%', background: 'var(--menu-bg-dark)', color: 'var(--menu-text)', padding: '20px', transition: 'left 0.3s ease', zIndex: 1000, pointerEvents: isOpen ? 'auto' : 'none' }}
       >
-        {/* MOM AI dropdown*/}
+        {/* PARENT AI dropdown*/}
         {isOpen && (
           <>
             <h3
