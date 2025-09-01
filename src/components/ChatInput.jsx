@@ -64,7 +64,7 @@ export default function ChatInput({ onSend, initialText = '' }) {
         style={{
           width: '100%',
           minHeight: '50px',
-          maxHeight: '150px',
+          maxHeight: '140px',
           resize: 'none',
           overflowY: 'auto',
           overflowX: 'hidden',

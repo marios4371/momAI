@@ -1,4 +1,4 @@
-// SideMenu.jsx
+// SlideMenu.jsx
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { useConversations } from "./Conversation";
@@ -50,11 +50,12 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
     const content = (
       <div
         className="sm-item"
-        onClick={(e) => { onClick && onClick(e); }}
+        onClick={(e) => { onClick && onClick(e); if (!to && !onClick) e.preventDefault(); }}
         title={label}
         role="link"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter') { onClick && onClick(e); if (to) navigate(to); } }}
+        aria-current={location.pathname === to ? 'page' : undefined}
       >
         <div className="sm-icon" aria-hidden>{icon}</div>
         {isOpen && <div className="sm-label">{label}</div>}
@@ -72,7 +73,6 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
     e && e.stopPropagation();
     const conv = newConversation();
     try { if (conv?.id) selectConversation(conv.id); } catch {}
-    // close menu after creating (previous behaviour)
     closeMenu && closeMenu();
     setTimeout(() => navigate('/'), 50);
   };
@@ -92,7 +92,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
     >
       {/* ICONS ROW */}
       <div className="sm-top">
-        {/* Toggle */}
+        {/* Toggle (first - aligned) */}
         <div
           ref={btnRef}
           className="sm-item sm-toggle"
@@ -106,32 +106,55 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
         >
           <div className="sm-icon" aria-hidden>
             {isOpen ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <Icon>
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              </Icon>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <Icon>
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="12" x2="21" y2="12" />
                 <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
+              </Icon>
             )}
           </div>
+          {isOpen && <div className="sm-label">Menu</div>}
         </div>
 
-        <IconButton to="/" label="ParentAI" icon={<Icon><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"></path></Icon>} />
-        <IconButton to="/blog" label="Blog" icon={<Icon><path d="M21 15V6a2 2 0 0 0-2-2H7"></path><path d="M3 6v12a2 2 0 0 0 2 2h12"></path></Icon>} />
-        <IconButton to="/history" label="History" icon={<Icon><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></Icon>} />
+        {/* ParentAI - minimal chat bubble */}
+        <IconButton to="/" label="ParentAI" icon={
+          <Icon>
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
+            <path d="M8 10h8" />
+          </Icon>
+        } />
 
-        {/* New Advice appears as a compact item only when open */}
+        {/* Blog - simple document */}
+        <IconButton to="/blog" label="Blog" icon={
+          <Icon>
+            <path d="M14 2H6a2 2 0 0 0-2 2v16l4-3h6a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" />
+            <path d="M8 8h6" />
+            <path d="M8 12h6" />
+          </Icon>
+        } />
+
+        {/* History - clock */}
+        <IconButton to="/history" label="History" icon={
+          <Icon>
+            <circle cx="12" cy="12" r="8" />
+            <path d="M12 8v5l3 1" />
+          </Icon>
+        } />
+
+        {/* New Advice (only when open) */}
         {isOpen && (
           <div className="sm-item new-advice" onClick={handleNewAdvice} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') handleNewAdvice(); }} title="+ New Advice">
             <div className="sm-icon" aria-hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
+              <Icon>
+                <circle cx="12" cy="12" r="9" />
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+              </Icon>
             </div>
             <div className="sm-label">New Advice</div>
           </div>

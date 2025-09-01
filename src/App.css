@@ -177,7 +177,7 @@ button:focus {
 }
 .messages-container {
   position: fixed;
-  top: 120px;
+  top: 140px;
   left: 50%;
   transform: translateX(-50%);
   width: 92%;
@@ -210,6 +210,9 @@ button:focus {
 /* ------------------ Compact sidebar (replaces previous sidebar rules) ------------------ */
 
 /* Minimal/Ultra-compact sidebar: icons + New Advice + conversations */
+/* ------------------ Minimal / professional compact sidebar ------------------ */
+
+/* Base */
 .side-menu {
   position: fixed;
   top: 0;
@@ -222,74 +225,80 @@ button:focus {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding: 4px;            /* πολύ μικρό padding γύρω */
+  padding: 6px 6px;            /* μικρό padding γύρω */
 }
 
 /* widths */
-.side-menu.collapsed { width: 56px; padding-top: 4px; }
-.side-menu.open { width: 200px; padding-top: 6px; }
+.side-menu.collapsed { width: 56px; padding-top: 6px; }
+.side-menu.open { width: 200px; padding-top: 8px; }
 
-/* icon column: ultra-tight */
+/* icon column: tight and aligned */
 .sm-top {
   display: flex;
   flex-direction: column;
-  gap: 2px;                /* ΕΔΩ: πολύ μικρό κενό μεταξύ κουμπιών */
+  gap: 1%;                /* πολύ μικρό κενό μεταξύ κουμπιών — μειώνεται αν θέλεις */
   align-items: stretch;
+  margin-top: 6px;
 }
 
-/* item appearance - ultra compact */
+/* item appearance - compact */
 .sm-item {
   display: flex;
   align-items: center;
-  gap: 4px;                /* πολύ μικρό κενό ανάμεσα σε icon και label */
-  padding: 2px;            /* πολύ μικρό padding */
-  border-radius: 6px;
+  gap: 8px;                /* space between icon and label */
+  padding: 6px 8px;        /* ελαφρύ padding για easier click targets */
+  border-radius: 8px;
   color: white;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
+  transition: background 120ms ease, transform 120ms ease;
 }
 
-/* make inline svgs smaller so visual spacing shrinks */
+/* when collapsed keep items perfectly centered */
+.side-menu.collapsed .sm-item { justify-content: center; padding: 6px 4px; }
+
+/* icon sizing */
 .sm-icon {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.sm-icon svg {
-  width: 16px !important;
-  height: 16px !important;
-  display: block;
+.sm-icon svg { width: 18px !important; height: 18px !important; display: block; stroke: white; }
+
+/* label (only visible when open) */
+.sm-label { font-weight: 700; font-size: 13px; line-height: 1; color: #fff; }
+
+/* hover effects only when open */
+.side-menu.open .sm-item:hover {
+  background: rgba(255,255,255,0.035);
+  transform: translateX(3px);
 }
 
-/* label (only visible when open) - slightly smaller */
-.sm-label { font-weight: 700; font-size: 12px; line-height: 1; }
+/* Active state (current route) */
+.sm-item[aria-current="page"] {
+  background: rgba(255,255,255,0.06);
+}
 
 /* New Advice compact adjustments */
-.sm-item.new-advice { padding-left: 4px; padding-right: 4px; }
-
-/* hover: smaller translate */
-.side-menu.open .sm-item:hover {
-  background: rgba(255,255,255,0.04);
-  transform: translateX(2px);
-  transition: transform 90ms ease;
-}
+.sm-item.new-advice { padding-left: 8px; padding-right: 8px; }
 
 /* conversations styling - tighter */
-.conversations { margin-top: 4px; padding-right: 4px; overflow-y: auto; }
+.conversations { margin-top: 6px; padding-right: 6px; overflow-y: auto; }
 .conversation-row {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   align-items: center;
-  padding: 2px;
+  padding: 6px 4px;
   border-radius: 6px;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   background: transparent;
+  color: #fff;
 }
-.side-menu.open .conversation-row:hover { background: rgba(255,255,255,0.03); }
+.side-menu.open .conversation-row:hover { background: rgba(255,255,255,0.03); cursor: pointer; }
 
-/* hide leftover old elements */
+/* hide leftover old elements if any */
 .menu-row,
 .mom-header,
 .btn.new-advice,
