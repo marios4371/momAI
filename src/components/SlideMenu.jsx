@@ -68,14 +68,17 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
     ) : content;
   };
 
-  const handleNewAdvice = (e) => {
+    const handleNewAdvice = async (e) => {
     e && e.stopPropagation();
-    const conv = newConversation();
-    try { if (conv?.id) selectConversation(conv.id); } catch {}
-    // close menu after creating (previous behaviour)
+    try {
+      const conv = await newConversation();
+      if (conv?.id) selectConversation(conv.id);
+    } catch (err) {
+    }
     closeMenu && closeMenu();
     setTimeout(() => navigate('/'), 50);
   };
+
 
   return (
     <nav

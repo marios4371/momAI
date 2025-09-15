@@ -20,6 +20,13 @@ import { GoogleIcon, FacebookIcon } from '../components/CustomIcons.jsx';
 
 const publicLogoPath = '/ai.png';
 
+// Safe detection of API base for CRA, Vite or fallback to localhost
+const API_BASE =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
+  window.REACT_APP_API_BASE ||
+  'http://localhost:8080';
+
 /* ---------- Styled containers ---------- */
 const StyledCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -101,18 +108,26 @@ function CheckboxIconChecked() {
 }
 
 export default function AuthPage({ onAuth, setTheme }) {
+  // mode: 'signIn' | 'signUp'
   const [mode, setMode] = useState('signIn');
-  const [username, setUsername] = useState('');
+
+  // Note: `name` -> will be sent as `username` to backend (keeps User.java shape)
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState(''); // email field
   const [password, setPassword] = useState('');
   const [gender, setGender] = useState('boy');
-  const [name, setName] = useState('');
 
+  // validation states
   const [emailError, setEmailError] = useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = useState('');
   const [passwordError, setPasswordError] = useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
   const [nameError, setNameError] = useState(false);
   const [nameErrorMessage, setNameErrorMessage] = useState('');
+
+  // server + loading
+  const [serverError, setServerError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -128,7 +143,8 @@ export default function AuthPage({ onAuth, setTheme }) {
         setNameErrorMessage('');
       }
     }
-    if (!username || !/\S+@\S+\.\S+/.test(username)) {
+    // email validation (works for signIn and signUp)
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setEmailError(true);
       setEmailErrorMessage('Please enter a valid email address.');
       valid = false;
@@ -147,13 +163,106 @@ export default function AuthPage({ onAuth, setTheme }) {
     return valid;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validateSignUp()) return;
-    if (typeof setTheme === 'function') setTheme(gender);
-    if (typeof onAuth === 'function') onAuth();
-    setTimeout(() => navigate('/', { replace: true }), 40);
-  };
+  // helper fetch functions
+  async function apiRegister({ username, email, password }) {
+    const res = await fetch(`${API_BASE}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password }),
+    });
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+    if (!res.ok) {
+      const msg = typeof data === 'string' ? data : data?.message || JSON.stringify(data);
+      const err = new Error(msg);
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  async function apiLogin({ email, password }) {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+    if (!res.ok) {
+      const msg = typeof data === 'string' ? data : data?.message || JSON.stringify(data);
+      const err = new Error(msg);
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setServerError('');
+  if (!validateSignUp()) return;
+
+  setLoading(true);
+  try {
+    if (mode === 'signUp') {
+      // send name as username to match your User.java (username column)
+      const payload = { username: name.trim(), email: email.trim(), password };
+      const user = await apiRegister(payload); // περιμένουμε το created UserDTO
+
+      // αποθήκευση user id στο localStorage ώστε να το διαβάσει ConversationsProvider
+      try {
+        const uid = String(user?.id ?? user?.userId ?? user?._id ?? '');
+        if (uid) {
+          localStorage.setItem('momai_user_id', uid);
+        } else {
+          console.warn('Register returned no id:', user);
+        }
+      } catch (e) {
+        console.warn('Failed to write momai_user_id to localStorage', e);
+      }
+
+      // on success, set theme & notify parent and navigate
+      if (typeof setTheme === 'function') setTheme(gender);
+      if (typeof onAuth === 'function') onAuth();
+      navigate('/', { replace: true });
+    } else {
+      // signIn
+      const payload = { email: email.trim(), password };
+      const user = await apiLogin(payload);
+
+      try {
+        const uid = String(user?.id ?? user?.userId ?? user?._id ?? '');
+        if (uid) {
+          localStorage.setItem('momai_user_id', uid);
+        } else {
+          console.warn('Login returned no id:', user);
+        }
+      } catch (e) {
+        console.warn('Failed to write momai_user_id to localStorage', e);
+      }
+
+      if (typeof onAuth === 'function') onAuth();
+      navigate('/', { replace: true });
+    }
+  } catch (err) {
+    console.error('Auth error', err);
+    setServerError(err.message || 'Server error');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const logoSrc = publicLogoPath;
 
@@ -176,8 +285,6 @@ export default function AuthPage({ onAuth, setTheme }) {
               >
                 Welcome to parentAI
               </Typography>
-              <br />
-              <br />
               <Box
                 component="img"
                 src={logoSrc}
@@ -201,8 +308,9 @@ export default function AuthPage({ onAuth, setTheme }) {
                 ml: 4,
                 fontWeight: 600,
               }}
-            ></Typography>
+            />
           )}
+
           <Box
             component="form"
             onSubmit={handleSubmit}
@@ -216,6 +324,12 @@ export default function AuthPage({ onAuth, setTheme }) {
               boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.02)',
             }}
           >
+            {/* server error */}
+            {serverError && (
+              <Typography sx={{ color: '#ffb4b4', fontSize: 14 }}>{serverError}</Typography>
+            )}
+
+            {/* Full name -> will be sent as `username` */}
             {mode === 'signUp' && (
               <FormControl>
                 <FormLabel htmlFor="name" sx={{ mb: 1, color: '#ddd' }}>
@@ -244,6 +358,7 @@ export default function AuthPage({ onAuth, setTheme }) {
               </FormControl>
             )}
 
+            {/* Email */}
             <FormControl>
               <FormLabel htmlFor="email" sx={{ mb: 1, color: '#ddd' }}>
                 Email
@@ -252,8 +367,8 @@ export default function AuthPage({ onAuth, setTheme }) {
                 id="email"
                 name="email"
                 placeholder="your@email.com"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 fullWidth
                 required
                 error={emailError}
@@ -269,6 +384,7 @@ export default function AuthPage({ onAuth, setTheme }) {
               />
             </FormControl>
 
+            {/* Password */}
             <FormControl>
               <FormLabel htmlFor="password" sx={{ mb: 1, color: '#ddd' }}>
                 Password
@@ -295,6 +411,7 @@ export default function AuthPage({ onAuth, setTheme }) {
               />
             </FormControl>
 
+            {/* Baby - theme choice */}
             <Box
               sx={{
                 display: 'flex',
@@ -340,6 +457,7 @@ export default function AuthPage({ onAuth, setTheme }) {
               type="submit"
               variant="contained"
               fullWidth
+              disabled={loading}
               sx={{
                 textTransform: 'none',
                 bgcolor: '#57575b',
@@ -347,7 +465,7 @@ export default function AuthPage({ onAuth, setTheme }) {
                 '&:hover': { bgcolor: '#4a4a4d' },
               }}
             >
-              {mode === 'signUp' ? 'Sign up' : 'Login'}
+              {loading ? (mode === 'signUp' ? 'Signing up...' : 'Logging in...') : (mode === 'signUp' ? 'Sign up' : 'Login')}
             </Button>
           </Box>
 

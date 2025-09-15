@@ -264,7 +264,7 @@ button:focus {
 }
 
 /* label (only visible when open) - slightly smaller */
-.sm-label { font-weight: 700; font-size: 12px; line-height: 1; }
+.sm-label { white-space:nowrap; font-weight: 700; font-size: 12px; line-height: 1; }
 
 /* New Advice compact adjustments */
 .sm-item.new-advice { padding-left: 4px; padding-right: 4px; }
@@ -277,7 +277,7 @@ button:focus {
 }
 
 /* conversations styling - tighter */
-.conversations { margin-top: 4px; padding-right: 4px; overflow-y: auto; }
+.conversations { margin-top: 4px; padding-right: 4px; overflow-x: hidden; overflow-y: auto; }
 .conversation-row {
   display: flex;
   gap: 4px;

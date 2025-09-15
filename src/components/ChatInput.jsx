@@ -13,19 +13,21 @@ export default function ChatInput({ onSend, initialText = '' }) {
       const maxHeight = 150;
       ta.style.height = Math.min(ta.scrollHeight, maxHeight) + 'px';
     }
-    if (typeof onTextChange === 'function') onTextChange(text);
-    }, [text]);
+    // removed undefined onTextChange reference
+  }, [text]);
 
   useEffect(() => {
-    // when active conversation changes, reset to initialText (usually empty) and focus
     setText(initialText || '');
     try { textareaRef.current && textareaRef.current.focus(); } catch (e) {}
   }, [activeId, initialText]);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e?.preventDefault();
     if (!text.trim()) return;
-    if (onSend) onSend(text.trim());
+
+    if (typeof onSend === 'function') {
+      onSend(text.trim());
+    }
     setText('');
   };
 
@@ -81,7 +83,6 @@ export default function ChatInput({ onSend, initialText = '' }) {
         className="custom-scrollbar"
       />
 
-      {/* send button */}
       <button
         type="submit"
         className="send-btn"
@@ -102,7 +103,6 @@ export default function ChatInput({ onSend, initialText = '' }) {
           padding: 0
         }}
       >
-        {/*arrow*/}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
           <path d="M12 19V6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
           <path d="M5 12l7-7 7 7" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>

@@ -166,6 +166,7 @@ export default function UserSettings({ userImage, onLogout }) {
               role="menuitem"
             >
               <span style={{ color: 'inherit' }}>Settings</span>
+              <FiSettings size={18} style={{ flex: '0 0 18px', color: 'inherit' }}/>
             </li>
 
             <li

@@ -70,7 +70,7 @@ function ChatArea() {
   return (
     <>
       <div style={{ position: 'fixed', top: '100px', left: '50%', transform: 'translateX(-50%)', width: '90%', maxWidth: 720, zIndex: 1300 }}>
-        <ChatInput onSend={handleSend} initialText={editingText} disabled={isBusy} onTextChange={() => {}} />
+        <ChatInput onSend={(txt) => sendUserMessage(txt)} initialText="" />
       </div>
 
       <div
