@@ -12,7 +12,7 @@ function Icon({ children, size = 18 }) {
 }
 
 export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
-  const { conversations, activeId, newConversation, selectConversation, removeConversation } = useConversations();
+  const { conversations, activeId, newConversation, selectConversation, removeConversation, clearActive } = useConversations();
   const location = useLocation();
   const menuRef = useRef(null);
   const btnRef = useRef(null);
@@ -68,6 +68,17 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
     ) : content;
   };
 
+    const handleParentAI = (e) => {
+    e && e.stopPropagation();
+    // Clear current selection so the page is empty and suppress auto-select briefly
+    clearActive();
+    // Clear persisted active id as well to avoid reload auto-select
+    try { localStorage.removeItem('momai_active_v1'); } catch {}
+    // Optionally close the menu and navigate home
+    closeMenu && closeMenu();
+    navigate('/');
+  };
+
     const handleNewAdvice = async (e) => {
     e && e.stopPropagation();
     try {
@@ -109,31 +120,62 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
         >
           <div className="sm-icon" aria-hidden>
             {isOpen ? (
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
+              // close icon
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
+              // menu icon
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M3 6h18M3 12h18M3 18h18" />
               </svg>
             )}
           </div>
         </div>
 
-        <IconButton to="/" label="ParentAI" icon={<Icon><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"></path></Icon>} />
-        <IconButton to="/blog" label="Blog" icon={<Icon><path d="M21 15V6a2 2 0 0 0-2-2H7"></path><path d="M3 6v12a2 2 0 0 0 2 2h12"></path></Icon>} />
-        <IconButton to="/history" label="History" icon={<Icon><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></Icon>} />
+        <div className="sm-actions">
+          {/* ParentAI */}
+          <IconButton
+            label="ParentAI"
+            onClick={handleParentAI}
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M3 7a2 2 0 0 1 2-2h8.5a2 2 0 0 1 1.6.8l3.4 4.4a2 2 0 0 1 .4 1.2V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <path d="M10 13h4M7 13h.01M7 17h.01M10 17h7" />
+              </svg>
+            }
+          />
+          {/* Blog + History (closer spacing as a pair) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <IconButton
+              to="/blog"
+              label="Blog"
+              icon={
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M4 5h11a4 4 0 0 1 4 4v10H8a4 4 0 0 1-4-4z" />
+                  <path d="M8 5v14" />
+                </svg>
+              }
+            />
+            <IconButton
+              to="/history"
+              label="History"
+              icon={
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v5l3 2" />
+                </svg>
+              }
+            />
+          </div>
+        </div>
 
         {/* New Advice appears as a compact item only when open */}
         {isOpen && (
           <div className="sm-item new-advice" onClick={handleNewAdvice} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') handleNewAdvice(); }} title="+ New Advice">
             <div className="sm-icon" aria-hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14" />
               </svg>
             </div>
             <div className="sm-label">New Advice</div>

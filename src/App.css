@@ -175,41 +175,84 @@ button:focus {
 .user-menu .menu-item {
   color: inherit;
 }
-.messages-container {
-  position: fixed;
-  top: 120px;
-  left: 50%;
-  transform: translateX(-50%);
+
+/* ------------------ CHAT container (fixed) + spacer approach ------------------ */
+
+/* spacer που συμμετέχει στο document flow και παίρνει ΜΟΝΟ το υπερβάλλον ύψος
+   (δηλαδή δεν εμφανίζει scrollbar αν το περιεχόμενο χωράει στο viewport) */
+.messages-spacer {
+  margin-top: 140px; /* ίδιο offset με το fixed container */
   width: 92%;
   max-width: 900px;
-  max-height: 75vh;
-  overflow-y: auto;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  /* Το inline style height θα οριστεί δυναμικά από React (θα είναι 0 αν χωράει) */
+}
+
+/* Το fixed container που θέλουμε να παραμείνει οπτικά στην ίδια θέση.
+   Θα συγχρονίζεται με το scroll (JS) για να "κινείται" όταν ο χρήστης χρησιμοποιεί την default scrollbar. */
+.messages-container {
+  position: fixed;
+  top: 140px;
+  left: 50%;
+  transform: translateX(-50%); /* translateY θα προστίθεται δυναμικά στο inline style */
+  width: 92%;
+  max-width: 900px;
+  max-height: none;
+  overflow: visible;
   padding: 12px;
   box-sizing: border-box;
   z-index: 1200;
+
+  /* default: block pointer events off για να μην μπλοκάρει άλλα στοιχεία — 
+     αλλά ενεργοποιούμε pointer-events για τα εσωτερικά που πρέπει να είναι clickable */
+  pointer-events: none;
 }
 
-.messages-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.messages-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-.messages-container::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.8);
-  border-radius: 8px;
-  min-height: 24px;
+/* επαναφέρουμε pointer-events για το εσωτερικό που πρέπει να είναι clickable */
+.messages-container .message-row,
+.messages-container button,
+.messages-container textarea,
+.messages-container a {
+  pointer-events: auto;
 }
 
-.messages-container {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.8) transparent;
+/* style των μηνυμάτων */
+.message-row {
+  margin-bottom: 8px;
 }
+.messages-fade {
+  /* Optional: transition for smooth appear/disappear */
+  transition: opacity 200ms ease;
+}
+
+/* Default browser scrollbar θα εμφανιστεί για το document όταν το spacer δίνει overflow */
+
+/* Floating scroll-to-bottom button */
+.scroll-bottom-btn {
+  position: fixed;
+  right: 24px;
+  bottom: 120px; /* sits above chat input area */
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(128,128,128,0.9); /* grey circle */
+  color: #fff; /* white arrow */
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+  cursor: pointer;
+  z-index: 1450;
+  transition: transform 120ms ease, background 160ms ease, opacity 160ms ease;
+}
+.scroll-bottom-btn:hover { background: rgba(150,150,150,0.95); transform: translateY(-2px); }
+.scroll-bottom-btn:active { transform: translateY(0); }
 
 /* ------------------ Compact sidebar (replaces previous sidebar rules) ------------------ */
 
-/* Minimal/Ultra-compact sidebar: icons + New Advice + conversations */
 .side-menu {
   position: fixed;
   top: 0;
@@ -222,61 +265,65 @@ button:focus {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  padding: 4px;            /* πολύ μικρό padding γύρω */
+  padding: 4px;
 }
 
 /* widths */
 .side-menu.collapsed { width: 56px; padding-top: 4px; }
 .side-menu.open { width: 200px; padding-top: 6px; }
 
-/* icon column: ultra-tight */
 .sm-top {
   display: flex;
   flex-direction: column;
-  gap: 2px;                /* ΕΔΩ: πολύ μικρό κενό μεταξύ κουμπιών */
+  gap: 10px;
   align-items: stretch;
 }
 
-/* item appearance - ultra compact */
+.sm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
 .sm-item {
   display: flex;
   align-items: center;
-  gap: 4px;                /* πολύ μικρό κενό ανάμεσα σε icon και label */
-  padding: 2px;            /* πολύ μικρό padding */
-  border-radius: 6px;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
   color: white;
   cursor: pointer;
   font-size: 12px;
 }
 
-/* make inline svgs smaller so visual spacing shrinks */
 .sm-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .sm-icon svg {
-  width: 16px !important;
-  height: 16px !important;
+  width: 20px !important;
+  height: 20px !important;
   display: block;
 }
 
-/* label (only visible when open) - slightly smaller */
 .sm-label { white-space:nowrap; font-weight: 700; font-size: 12px; line-height: 1; }
-
-/* New Advice compact adjustments */
 .sm-item.new-advice { padding-left: 4px; padding-right: 4px; }
 
-/* hover: smaller translate */
-.side-menu.open .sm-item:hover {
-  background: rgba(255,255,255,0.04);
+.side-menu .sm-item {
+  transition: background 140ms ease, transform 90ms ease;
+}
+.side-menu .sm-item:hover {
+  background: rgba(255,255,255,0.08);
   transform: translateX(2px);
-  transition: transform 90ms ease;
+}
+.side-menu .sm-item:active {
+  background: rgba(255,255,255,0.12);
 }
 
-/* conversations styling - tighter */
 .conversations { margin-top: 4px; padding-right: 4px; overflow-x: hidden; overflow-y: auto; }
 .conversation-row {
   display: flex;
@@ -289,7 +336,6 @@ button:focus {
 }
 .side-menu.open .conversation-row:hover { background: rgba(255,255,255,0.03); }
 
-/* hide leftover old elements */
 .menu-row,
 .mom-header,
 .btn.new-advice,
@@ -297,7 +343,6 @@ button:focus {
 .convo-dot,
 .menu-toggle-btn { display: none !important; }
 
-/* responsive tweak */
 @media (max-width: 520px) {
   .side-menu.open { width: 180px; }
 }
