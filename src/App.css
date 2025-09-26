@@ -275,22 +275,22 @@ button:focus {
 .sm-top {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 2px; /* tighter vertical spacing */
   align-items: stretch;
 }
 
 .sm-actions {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 8px;
+  gap: 1px; /* as tight as possible */
+  margin-top: 2px;
 }
 
 .sm-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: 4px; /* reduce space between icon and label */
+  padding: 4px 6px; /* minimal padding while keeping clickability */
   border-radius: 8px;
   color: white;
   cursor: pointer;
@@ -310,6 +310,17 @@ button:focus {
   display: block;
 }
 
+/* Make icons visually bolder without changing their size */
+.sm-icon svg,
+.sm-icon svg path,
+.sm-icon svg circle,
+.sm-icon svg line,
+.sm-icon svg polyline,
+.sm-icon svg rect {
+  stroke-width: 2.2 !important;
+  stroke: currentColor !important;
+}
+
 .sm-label { white-space:nowrap; font-weight: 700; font-size: 12px; line-height: 1; }
 .sm-item.new-advice { padding-left: 4px; padding-right: 4px; }
 
@@ -327,11 +338,11 @@ button:focus {
 .conversations { margin-top: 4px; padding-right: 4px; overflow-x: hidden; overflow-y: auto; }
 .conversation-row {
   display: flex;
-  gap: 4px;
+  gap: 2px; /* tighter spacing */
   align-items: center;
-  padding: 2px;
+  padding: 1px 2px; /* minimal vertical padding */
   border-radius: 6px;
-  margin-bottom: 2px;
+  margin-bottom: 1px; /* reduce gap between rows */
   background: transparent;
 }
 .side-menu.open .conversation-row:hover { background: rgba(255,255,255,0.03); }

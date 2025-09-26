@@ -1,0 +1,197 @@
+.global-chat-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  background: #f5efe6; /* ανοιχτό μπεζ */
+  color: #1e1b18;
+  padding-top: 0;
+}
+
+/* αφαιρούμε header styles — δεν υπάρχει πλέον header */
+
+/* header top-right create profile */
+.header {
+  position: fixed;
+  top: 12px;
+  right: 20px;
+  z-index: 1400;
+}
+.create-profile-btn {
+  background: transparent;
+  color: #1e1b18;
+  border: 1px solid rgba(0,0,0,0.08);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+}
+.create-profile-btn:hover {
+  /* subtle light-gray highlight on hover, no border change */
+  background: rgba(60,60,60,0.04);
+}
+.create-profile-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ensure there is no browser focus ring or outline on hover/active/focus
+   and that border stays the same color */
+.create-profile-btn,
+.create-profile-btn:focus,
+.create-profile-btn:active,
+.create-profile-btn:hover {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: rgba(0,0,0,0.08);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* chat panel τοποθετημένο πιο πάνω (μικρό top offset) */
+.chat-panel {
+  position: relative;
+  margin: 0 auto;
+  /* match the ChatInput wrapper so messages sit directly under it */
+  width: 90%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+  box-sizing: border-box;
+  z-index: 100;
+}
+
+/* variant για πολύ ψηλά αν χρειαστεί */
+.chat-panel--top {
+  top: 0.5px;
+}
+
+/* messages container και input όπως πριν */
+.messages-container {
+  width: 100%;
+  box-sizing: border-box;
+  /* place messages below the fixed ChatInput: use CSS variables set on the fixed wrapper
+     so we don't change absolute placements while ensuring messages render underneath */
+  margin: calc(var(--globalchat-input-top, 35px) + var(--globalchat-input-height, 72px) + 8px) auto 140px;
+  padding: 12px;
+  background: transparent;
+  overflow: visible; /* use page scrollbar */
+  /* ensure the container contributes height so the page can scroll like ChatGPT */
+  min-height: 120px;
+}
+
+/* Chat input wrapper spans full width so the ChatInput component lines up exactly */
+.chat-input-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 1250;
+}
+
+/* top mask to hide messages beneath the fixed ChatInput */
+.messages-top-mask {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: var(--globalchat-input-top, 35px);
+  width: 90%;
+  max-width: 720px;
+  height: calc(var(--globalchat-input-height, 72px) + 8px);
+  z-index: 1090; /* below chat input (1100) */
+  pointer-events: none;
+  background: linear-gradient(to bottom, #f5efe6 0%, rgba(245,239,230,0.95) 20%, rgba(245,239,230,0.85) 40%, rgba(245,239,230,0.6) 60%, rgba(245,239,230,0.2) 80%, rgba(245,239,230,0) 100%);
+}
+
+/* message bubble colors tuned for light background (left aligned) */
+.message {
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  max-width: 86%;
+  word-break: break-word;
+  color: #1e1b18;
+  /* default assistant (bot) on the left */
+  margin-left: 0;
+  margin-right: auto;
+  text-align: left;
+  /* darker beige close to background but clearly visible */
+  background: #e6dfd0; /* slightly darker than #f5efe6 */
+}
+.message.user {
+  /* user bubble on the right - also beige variant */
+  margin-left: auto;
+  margin-right: 0;
+  text-align: right;
+  background: #dfd6c6; /* a touch darker for contrast */
+  color: #1e1b18;
+}
+.message.bot {
+  /* assistant/bot on the right */
+  margin-left: auto;
+  margin-right: 0;
+  text-align: right;
+  background: #e9e0d2; /* subtle beige */
+  color: #1e1b18;
+}
+
+/* ensure messages are displayed in a column and aligned to the right side of the page */
+.messages-container > .message {
+  display: block;
+}
+.messages-container {
+  align-items: flex-end;
+}
+.no-messages {
+  color: rgba(30,27,24,0.6);
+  padding: 8px 0;
+}
+
+html body {
+  background:#000;
+}
+.scroll-down-arrow {
+  background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iQ2hldnJvbl90aGluX2Rvd24iIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMjAgMjAiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDIwIDIwIiBmaWxsPSJ3aGl0ZSIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+PHBhdGggZD0iTTE3LjQxOCw2LjEwOWMwLjI3Mi0wLjI2OCwwLjcwOS0wLjI2OCwwLjk3OSwwYzAuMjcsMC4yNjgsMC4yNzEsMC43MDEsMCwwLjk2OWwtNy45MDgsNy44M2MtMC4yNywwLjI2OC0wLjcwNywwLjI2OC0wLjk3OSwwbC03LjkwOC03LjgzYy0wLjI3LTAuMjY4LTAuMjctMC43MDEsMC0wLjk2OWMwLjI3MS0wLjI2OCwwLjcwOS0wLjI2OCwwLjk3OSwwTDEwLDEzLjI1TDE3LjQxOCw2LjEwOXoiLz48L3N2Zz4=);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.scroll-down-link {
+  position: fixed;
+  z-index: 1600;
+  cursor: pointer;
+  height: 60px;
+  width: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  line-height: 60px;
+  bottom: 10px;
+  color: #363636;
+  text-align: center;
+  font-size: 70px;
+  text-decoration: none;
+  text-shadow: 0px 0px 3px rgba(0, 0, 0, 0.4);
+  -webkit-animation: fade_move_down 2s ease-in-out infinite;
+  -moz-animation:    fade_move_down 2s ease-in-out infinite;
+  animation:         fade_move_down 2s ease-in-out infinite;
+  /*animated scroll arrow animation*/
+  @-webkit-keyframes fade_move_down {
+    0%   { -webkit-transform:translate(0,-20px); opacity: 0;  }
+    50%  { opacity: 1;  }
+    100% { -webkit-transform:translate(0,20px); opacity: 0; }
+  }
+  @-moz-keyframes fade_move_down {
+    0%   { -moz-transform:translate(0,-20px); opacity: 0;  }
+    50%  { opacity: 1;  }
+    100% { -moz-transform:translate(0,20px); opacity: 0; }
+  }
+  @keyframes fade_move_down {
+    0%   { transform:translate(0,-20px); opacity: 0;  }
+    50%  { opacity: 1;  }
+    100% { transform:translate(0,20px); opacity: 0; }
+  }
+}

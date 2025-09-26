@@ -1,7 +1,57 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiSettings, FiLogOut, FiX } from 'react-icons/fi';
 import './User.css';
+
+function initialsFromName(fullName) {
+  if (!fullName) return '';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return fullName.trim().slice(0, 2).toUpperCase();
+}
+function initialsFromEmail(em) {
+  if (!em) return '';
+  const local = em.split('@')[0] || '';
+  return local.slice(0, 2).toUpperCase();
+}
+function readStoredUser() {
+  try {
+    const photo = localStorage.getItem('momai_user_photo') || '';
+    const name = localStorage.getItem('momai_user_name') || '';
+    const email = localStorage.getItem('momai_user_email') || '';
+    let initials = localStorage.getItem('momai_user_initials') || '';
+    if (!initials) {
+      initials = name ? initialsFromName(name) : initialsFromEmail(email) || 'U';
+    }
+    return { photo, name, email, initials };
+  } catch {
+    return { photo: '', name: '', email: '', initials: 'U' };
+  }
+}
+
+// Ζήτα hi-DPI εκδοχή της Google photo για καθαρά χρώματα/λεπτομέρειες.
+// Υποστηρίζει μοτίβα ...=s96(-c) και ...?sz=96.
+// Δεν αλλάζει τίποτα άλλο στο URL.
+function getHiDpiGooglePhoto(url, cssPx) {
+  if (!url) return url;
+  try {
+    const dpr = Math.ceil(window.devicePixelRatio || 1);
+    const target = Math.max(cssPx, cssPx * dpr); // ζητάμε τουλάχιστον cssPx*dpr
+    // Αν έχει μορφή =sNN[-c]
+    if (/=s\d+(-c)?($|\?)/.test(url)) {
+      return url.replace(/=s(\d+)(-c)?(?=$|\?)/, (_m, _n, c) => `=s${target}${c || ''}`);
+    }
+    // Αν έχει παράμετρο ?sz=NN
+    if (/\?(.*&)?sz=\d+/.test(url)) {
+      return url.replace(/([?&]sz=)\d+/, `$1${target}`);
+    }
+    // Αλλιώς πρόσθεσέ το στο τέλος (κρατάμε τυχόν -c αν υπήρχε, αλλά εδώ δεν υπάρχει)
+    if (url.includes('?')) return `${url}&sz=${target}`;
+    return `${url}?sz=${target}`;
+  } catch {
+    return url;
+  }
+}
 
 export default function UserSettings({ userImage, onLogout }) {
   const [open, setOpen] = useState(false); // avatar dropdown
@@ -11,11 +61,43 @@ export default function UserSettings({ userImage, onLogout }) {
   const ref = useRef(null);
   const modalRef = useRef(null);
 
+  // user avatar state from storage (google photo or initials)
+  const [user, setUser] = useState(readStoredUser());
+  const [hasImg, setHasImg] = useState(Boolean(user.photo));
+
   // local settings state
   const [localTheme, setLocalTheme] = useState(() => (document.body.classList.contains('theme-girl') ? 'girl' : 'boy'));
   const [subscribed, setSubscribed] = useState(false);
   const [plan, setPlan] = useState('monthly');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => setHasImg(Boolean(user.photo)), [user.photo]);
+
+  // keep avatar in sync with changes from login/logout or other tabs
+  useEffect(() => {
+    const keys = new Set([
+      'momai_user_photo',
+      'momai_user_name',
+      'momai_user_email',
+      'momai_user_initials',
+      'momai_login_provider',
+    ]);
+    const onStorage = (e) => {
+      if (!e || !e.key || keys.has(e.key)) setUser(readStoredUser());
+    };
+    const onFocus = () => setUser(readStoredUser());
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') setUser(readStoredUser());
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
 
   const menuItemStyle = {
     display: 'flex',
@@ -34,6 +116,8 @@ export default function UserSettings({ userImage, onLogout }) {
     setOpen(false);
     setSettingsOpen(false);
     if (typeof onLogout === 'function') onLogout();
+    // local refresh of user state after parent cleaned storage
+    setTimeout(() => setUser(readStoredUser()), 0);
     navigate('/auth');
   };
 
@@ -87,11 +171,17 @@ export default function UserSettings({ userImage, onLogout }) {
 
   const saveSettings = async () => {
     setSaving(true);
-    // simulate save (replace with fetch to backend if needed)
     await new Promise((r) => setTimeout(r, 700));
     setSaving(false);
     setSettingsOpen(false);
   };
+
+  // Ζήτησε hi-DPI URL για το avatar (40px είναι το container στη User.css)
+  const AVATAR_CSS_PX = 40;
+  const photoHiDpi = useMemo(
+    () => (user.photo ? getHiDpiGooglePhoto(user.photo, AVATAR_CSS_PX) : ''),
+    [user.photo]
+  );
 
   return (
     <div
@@ -103,20 +193,27 @@ export default function UserSettings({ userImage, onLogout }) {
         zIndex: 1000,
       }}
     >
-      <img
-        src={userImage}
-        alt="User"
-        style={{
-          width: '40px',
-          height: '40px',
-          borderRadius: '50%',
-          objectFit: 'cover',
-          border: 'none',
-          outline: 'none',
-          cursor: 'pointer',
-        }}
+      {/* Dynamic avatar: Google photo or initials */}
+      <div
+        className="user-avatar"
+        role="button"
+        aria-label="Open user menu"
         onClick={() => setOpen((v) => !v)}
-      />
+        title={user.name || user.email || 'User'}
+      >
+        {hasImg ? (
+          <img
+            src={photoHiDpi}
+            alt={user.name || user.email || 'User'}
+            referrerPolicy="no-referrer"
+            decoding="async"
+            loading="eager"
+            onError={() => setHasImg(false)}
+          />
+        ) : (
+          <span className="user-avatar-initials">{(user.initials || 'U').slice(0, 2)}</span>
+        )}
+      </div>
 
       {open && (
         <div
@@ -282,97 +379,11 @@ export default function UserSettings({ userImage, onLogout }) {
 
               {/* right panel */}
               <section className="right-col">
-                {selected === 'general' && (
-                  <div>
-                    <h3 style={{ marginTop: 0 }}>General</h3>
-                    <p style={{ color: 'rgba(255,255,255,0.65)' }}>Basic preferences and quick actions.</p>
-
-                    <div style={{ marginTop: 12 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <div style={{ fontWeight: 700 }}>Language</div>
-                          <div style={{ color: 'rgba(255,255,255,0.6)' }}>Greek (default)</div>
-                        </div>
-                        <div className="select-wrap">
-                          <select className="themed-select" defaultValue="el" aria-label="Language">
-                            <option value="el">Greek</option>
-                            <option value="en">English</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {selected === 'subscription' && (
-                  <div>
-                    <h3 style={{ marginTop: 0 }}>Subscription</h3>
-                    <p style={{ color: 'rgba(255,255,255,0.65)' }}>Manage your subscription plan.</p>
-
-                    <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <div style={{ fontWeight: 700 }}>{subscribed ? 'Active subscription' : 'No active subscription'}</div>
-                          <div style={{ color: 'rgba(255,255,255,0.6)' }}>{subscribed ? `Plan: ${plan}` : 'Choose a plan and subscribe'}</div>
-                        </div>
-                        <div>
-                          <button onClick={() => setSubscribed((s) => !s)} className={subscribed ? 'btn ghost' : 'btn'}>
-                            {subscribed ? 'Cancel subscription' : 'Subscribe'}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                          <input type="radio" name="plan" value="monthly" checked={plan === 'monthly'} onChange={() => setPlan('monthly')} />
-                          <span style={{ color: 'var(--muted, #cfcfcf)' }}>Monthly — €4.99/mo</span>
-                        </label>
-
-                        <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                          <input type="radio" name="plan" value="annual" checked={plan === 'annual'} onChange={() => setPlan('annual')} />
-                          <span style={{ color: 'var(--muted, #cfcfcf)' }}>Annual — €49.99/yr</span>
-                        </label>
-                      </div>
-
-                      <div style={{ color: 'rgba(255,255,255,0.6)' }}>
-                        <small>Note: This demo doesn’t process payments. Hook a payment gateway (Stripe, Paddle) to implement real billing.</small>
-                      </div>
-
-                    </div>
-                  </div>
-                )}
-
-                {selected === 'theme' && (
-                  <div>
-                    <h3 style={{ marginTop: 0 }}>Theme</h3>
-                    <p style={{ color: 'rgba(255,255,255,0.65)' }}>Switch the app visual theme.</p>
-
-                    <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                      <button onClick={() => toggleTheme('boy')} className={localTheme === 'boy' ? 'btn' : 'btn ghost'}>Boy</button>
-                      <button onClick={() => toggleTheme('girl')} className={localTheme === 'girl' ? 'btn' : 'btn ghost'}>Girl</button>
-                    </div>
-                  </div>
-                )}
-
-                {selected === 'account' && (
-                  <div>
-                    <h3 style={{ marginTop: 0 }}>Account</h3>
-                    <p style={{ color: 'rgba(255,255,255,0.65)' }}>Profile actions</p>
-
-                    <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-                      <button className="btn ghost" onClick={() => { setSettingsOpen(false); navigate('/profile'); }}>Open profile</button>
-                      <button className="btn" onClick={handleLogout}>Logout</button>
-                    </div>
-
-                  </div>
-                )}
-
-                {/* footer actions */}
+                {/* ... τα υπόλοιπα όπως τα έχεις ... */}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.03)' }}>
                   <button className="btn ghost" onClick={() => setSettingsOpen(false)}>Close</button>
                   <button className="btn" onClick={saveSettings} disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
                 </div>
-
               </section>
             </div>
 

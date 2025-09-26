@@ -1,60 +1,61 @@
-// SideMenu.jsx
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useRef } from 'react';
-import { useConversations } from "./Conversation";
+import React, { useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useConversations } from './Conversation';
 
-function Icon({ children, size = 18 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      {children}
-    </svg>
-  );
-}
-
-export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
-  const { conversations, activeId, newConversation, selectConversation, removeConversation, clearActive } = useConversations();
+export default function SlideMenu({ isOpen, toggleMenu, closeMenu }) {
+  const navigate = useNavigate();
   const location = useLocation();
   const menuRef = useRef(null);
   const btnRef = useRef(null);
-  const navigate = useNavigate();
 
-  // close on outside click / Esc (only when open)
-  useEffect(() => {
-    function onDocClick(e) {
-      if (!isOpen) return;
-      const target = e.target;
-      if (menuRef.current && !menuRef.current.contains(target) && btnRef.current && !btnRef.current.contains(target)) {
-        closeMenu && closeMenu();
-      }
-    }
-    function onKey(e) {
-      if (e.key === 'Escape' && isOpen) {
-        closeMenu && closeMenu();
-      }
-    }
-    document.addEventListener('mousedown', onDocClick);
-    document.addEventListener('touchstart', onDocClick);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onDocClick);
-      document.removeEventListener('touchstart', onDocClick);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [isOpen, closeMenu]);
+  const {
+    conversations = [],
+    clearActive,
+    newConversation,
+    selectConversation,
+    removeConversation,
+  } = useConversations?.() || {};
 
   const collapsedWidth = 56;
-  const openWidth = 200;
+  const openWidth = 220;
   const width = isOpen ? openWidth : collapsedWidth;
 
-  const IconButton = ({ to, label, icon, onClick }) => {
+  const isActivePath = (path) => location.pathname === path;
+
+  const handleParentAI = (e) => {
+    e && e.stopPropagation();
+    try { clearActive && clearActive(); } catch {}
+    try { localStorage.removeItem('momai_active_v1'); } catch {}
+    closeMenu && closeMenu();
+    navigate('/');
+  };
+
+  const handleNewAdvice = async (e) => {
+    e && e.stopPropagation();
+    try {
+      const conv = await (newConversation && newConversation());
+      if (conv?.id) selectConversation && selectConversation(conv.id);
+    } catch {}
+    closeMenu && closeMenu();
+    setTimeout(() => navigate('/'), 50);
+  };
+
+  const IconButton = ({ to, label, icon, onClick, active }) => {
+    const classes = `sm-item${active ? ' active' : ''}`;
     const content = (
       <div
-        className="sm-item"
+        className={classes}
         onClick={(e) => { onClick && onClick(e); }}
         title={label}
         role="link"
+        aria-label={label}
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter') { onClick && onClick(e); if (to) navigate(to); } }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onClick && onClick(e);
+            if (to) navigate(to);
+          }
+        }}
       >
         <div className="sm-icon" aria-hidden>{icon}</div>
         {isOpen && <div className="sm-label">{label}</div>}
@@ -62,34 +63,16 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
     );
 
     return to ? (
-      <Link to={to} onClick={() => { if (toggleMenu && isOpen) toggleMenu(); }} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <Link
+        to={to}
+        aria-current={active ? 'page' : undefined}
+        onClick={() => { if (toggleMenu && isOpen) toggleMenu(); }}
+        style={{ textDecoration: 'none', color: 'inherit' }}
+      >
         {content}
       </Link>
     ) : content;
   };
-
-    const handleParentAI = (e) => {
-    e && e.stopPropagation();
-    // Clear current selection so the page is empty and suppress auto-select briefly
-    clearActive();
-    // Clear persisted active id as well to avoid reload auto-select
-    try { localStorage.removeItem('momai_active_v1'); } catch {}
-    // Optionally close the menu and navigate home
-    closeMenu && closeMenu();
-    navigate('/');
-  };
-
-    const handleNewAdvice = async (e) => {
-    e && e.stopPropagation();
-    try {
-      const conv = await newConversation();
-      if (conv?.id) selectConversation(conv.id);
-    } catch (err) {
-    }
-    closeMenu && closeMenu();
-    setTimeout(() => navigate('/'), 50);
-  };
-
 
   return (
     <nav
@@ -101,12 +84,14 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
         height: '100%',
         transition: 'width 180ms ease',
         padding: isOpen ? '10px' : '6px',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        // διακριτική, minimal λευκή γραμμή όπως ChatGPT/Grok
+        borderRight: '1px solid rgba(255,255,255,0.08)',
       }}
     >
-      {/* ICONS ROW */}
+      {/* TOP: Toggle + Quick Links */}
       <div className="sm-top">
-        {/* Toggle */}
+        {/* Toggle (πάνω πάνω) */}
         <div
           ref={btnRef}
           className="sm-item sm-toggle"
@@ -120,24 +105,24 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
         >
           <div className="sm-icon" aria-hidden>
             {isOpen ? (
-              // close icon
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             ) : (
-              // menu icon
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M3 6h18M3 12h18M3 18h18" />
               </svg>
             )}
           </div>
+          {isOpen && <div className="sm-label">Menu</div>}
         </div>
 
-        <div className="sm-actions">
-          {/* ParentAI */}
+        {/* Quick group: ParentAI, Blog, History */}
+        <div className="sm-group sm-quick" style={{ marginTop: isOpen ? 16 : 12 }}>
           <IconButton
             label="ParentAI"
             onClick={handleParentAI}
+            active={isActivePath('/')}
             icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M3 7a2 2 0 0 1 2-2h8.5a2 2 0 0 1 1.6.8l3.4 4.4a2 2 0 0 1 .4 1.2V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -145,34 +130,43 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
               </svg>
             }
           />
-          {/* Blog + History (closer spacing as a pair) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <IconButton
-              to="/blog"
-              label="Blog"
-              icon={
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M4 5h11a4 4 0 0 1 4 4v10H8a4 4 0 0 1-4-4z" />
-                  <path d="M8 5v14" />
-                </svg>
-              }
-            />
-            <IconButton
-              to="/history"
-              label="History"
-              icon={
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>
-              }
-            />
-          </div>
+          <IconButton
+            to="/blog"
+            label="Blog"
+            active={isActivePath('/blog')}
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M4 5h11a4 4 0 0 1 4 4v10H8a4 4 0 0 1-4-4z" />
+                <path d="M8 5v14" />
+              </svg>
+            }
+          />
+          <IconButton
+            to="/history"
+            label="History"
+            active={isActivePath('/history')}
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg>
+            }
+          />
         </div>
 
-        {/* New Advice appears as a compact item only when open */}
+        <div className="sm-separator" />
+
+        {/* New Advice (πιο “primary”, μόνο όταν είναι ανοιχτό) */}
         {isOpen && (
-          <div className="sm-item new-advice" onClick={handleNewAdvice} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') handleNewAdvice(); }} title="+ New Advice">
+          <div
+            className="sm-item new-advice"
+            onClick={handleNewAdvice}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleNewAdvice(); }}
+            title="+ New Advice"
+            aria-label="New Advice"
+          >
             <div className="sm-icon" aria-hidden>
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14M5 12h14" />
@@ -183,7 +177,7 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
         )}
       </div>
 
-      {/* Conversations: only shown when menu is open and on root */}
+      {/* Conversations: μόνο όταν open και στο root */}
       {isOpen && location.pathname === '/' && (
         <div className="conversations" style={{ marginTop: 6 }}>
           <div style={{ fontWeight: 700, color: 'white', marginBottom: 6 }}>Conversations</div>
@@ -191,15 +185,14 @@ export default function SideMenu({ isOpen, toggleMenu, closeMenu }) {
             {conversations.map((c) => (
               <li key={c.id} className="conversation-row" title={c.title}>
                 <div
-                  onClick={() => { selectConversation(c.id); navigate('/'); closeMenu && closeMenu(); }}
+                  onClick={() => { selectConversation && selectConversation(c.id); navigate('/'); closeMenu && closeMenu(); }}
                   style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600, color: 'white', cursor: 'pointer', padding: '4px 0' }}
                 >
                   {c.title}
                 </div>
-
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <button
-                    onClick={(e) => { e.stopPropagation(); removeConversation(c.id); }}
+                    onClick={(e) => { e.stopPropagation(); removeConversation && removeConversation(c.id); }}
                     title="Delete"
                     aria-label={`Delete ${c.title}`}
                     style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.85)', cursor: 'pointer', padding: 6 }}
