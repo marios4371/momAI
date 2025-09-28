@@ -7,22 +7,16 @@ const USER_KEY = "momai_user_id";
 
 const Ctx = createContext(null);
 
-/**
- * Προστέθηκε προαιρετικό prop `userIdProp` που επιτρέπει στο parent να περάσει
- * το userId κατευθείαν (προτιμητέα λύση), αλλιώς ο provider παρακολουθεί το localStorage.
- */
 export function ConversationsProvider({ children, resetActiveOnMount = false, userIdProp = null }) {
   const location = useLocation();
   const firstMountRef = useRef(true);
   const prevPathRef = useRef(location.pathname);
   const lastCreatedRef = useRef(null);
 
-  // manage userId state: προτιμάμε prop αν δίνεται, αλλιώς διαβάζουμε localStorage
   const [userId, setUserId] = useState(() => {
     return userIdProp ?? (localStorage.getItem(USER_KEY) || null);
   });
 
-  // keep local conversations in state
   const [conversations, setConversations] = useState(() => {
     try {
       const raw = localStorage.getItem(KEY);
@@ -32,28 +26,21 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
     }
   });
 
-  // Always start with no active conversation; user explicitly selects or we create on send
   const [activeId, setActiveId] = useState(null);
-
   const [suppressAutoSelect, setSuppressAutoSelect] = useState(Boolean(resetActiveOnMount));
   const [isBusy, setIsBusy] = useState(false);
 
-  // Keep userId in sync if parent prop changes
   useEffect(() => {
     if (userIdProp && userIdProp !== userId) {
       setUserId(userIdProp);
-      // persist to localStorage so other code can read it
       try { localStorage.setItem(USER_KEY, String(userIdProp)); } catch {}
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userIdProp]);
 
-  // Listen to storage events (login might happen in same tab setting localStorage,
-  // or in another tab). This updates provider when USER_KEY changes.
   useEffect(() => {
     const onStorage = (e) => {
       if (!e) return;
-      // modern browsers: e.key string or null for clear()
       if (e.key === USER_KEY) {
         const newVal = e.newValue || null;
         setUserId(newVal);
@@ -63,12 +50,9 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  // Persist local copy (for offline UX) — we store conversations in KEY
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(conversations)); } catch {}
   }, [conversations]);
-
-  // Do not persist activeId anymore to always land on blank state
 
   useEffect(() => {
     if (resetActiveOnMount) {
@@ -88,7 +72,6 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
     if (firstMountRef.current) {
       firstMountRef.current = false;
       prevPathRef.current = location.pathname;
-      // Ensure blank chat when landing directly on '/'
       if (location.pathname === "/") {
         setActiveId(null);
         try { localStorage.removeItem(KEY_ACTIVE); } catch {}
@@ -100,68 +83,56 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
     const prev = prevPathRef.current;
     const cur = location.pathname;
     if (cur === "/" && prev !== "/") {
-      // Always blank when entering '/'
       setActiveId(null);
       try { localStorage.removeItem(KEY_ACTIVE); } catch {}
     }
     prevPathRef.current = cur;
   }, [location.pathname, activeId]);
 
-  const API_BASE =
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
-    (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE) ||
-    window.REACT_APP_API_BASE ||
+  // Χρησιμοποιούμε ρητά το CHAT API BASE (8081)
+  const CHAT_API_BASE =
+    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHAT_API_BASE) ||
     'http://localhost:8081';
 
-  // helper to read latest user id from localStorage (fallback)
+  console.log('[Conversation] CHAT_API_BASE =', CHAT_API_BASE);
+
   const getUserIdHeader = useCallback(() => {
     return userId ?? (localStorage.getItem(USER_KEY) || null);
   }, [userId]);
 
-  // --- IMPORTANT: fetch conversations whenever userId becomes available or changes ---
+  // Φέρνουμε conversations όταν υπάρχει userId
   useEffect(() => {
     (async () => {
       const uid = getUserIdHeader();
+      console.log('[Conversation] current userId =', uid);
       if (!uid) {
-        // no user logged in: keep local conversations as fallback, do not wipe them
         return;
       }
 
-      // if user changed, wipe cached conversations (avoid showing other user's convos)
       try {
-        const stored = JSON.parse(localStorage.getItem(KEY) || "null");
-        // if local cache exists but it's from a different user, clear it
-        // We don't store per-user key by default, so safest is to clear when user logs-in
-        // to ensure we only show server data for the logged-in user.
         localStorage.removeItem(KEY);
-        setConversations([]); // clear while loading
-      } catch (e) {
-        // ignore
-      }
+        setConversations([]);
+      } catch {}
 
       try {
-        const res = await fetch(`${API_BASE}/api/conversations`, {
+        const res = await fetch(`${CHAT_API_BASE}/api/conversations`, {
           headers: { "X-User-Id": String(uid) }
         });
         if (!res.ok) {
-          // keep empty or fallback
+          console.warn('GET /api/conversations failed', res.status);
           return;
         }
         const list = await res.json();
         if (Array.isArray(list)) {
           const normalized = list.map(c => ({ ...c, messages: c.messages || [] }));
           setConversations(normalized);
-          // Do not auto-select here; selection/clearing is handled by location effects
-          // and user actions (ParentAI, New Advice, sendUserMessage auto-creates).
         }
       } catch (e) {
         console.warn("Failed loading conversations:", e);
       }
     })();
-    // run whenever userId changes (i.e. login/logout)
-  }, [getUserIdHeader, API_BASE, resetActiveOnMount, location.pathname]);
+  }, [getUserIdHeader, CHAT_API_BASE, resetActiveOnMount, location.pathname]);
 
-  // --- helpers to update state (unchanged) ---
   const replaceConversationMessages = useCallback((convId, messages) => {
     setConversations(prev => prev.map(c => (c.id === convId ? { ...c, messages } : c)));
   }, []);
@@ -176,16 +147,21 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
 
   const newConversation = useCallback(async (title = null) => {
     const uid = getUserIdHeader();
+
     if (!uid) {
+      // Αν δεν υπάρχει user id, μην προσπαθήσεις backend — δείξε καθαρό μήνυμα στον χρήστη
       const conv = { id: Date.now(), title: title || `Conversation ${conversations.length + 1}`, messages: [] };
       setConversations(s => [conv, ...s]);
       setActiveId(conv.id);
       lastCreatedRef.current = conv.id;
+      // Ενημερωτικό μήνυμα
+      const warn = { id: Date.now()+1, text: "Δεν είσαι συνδεδεμένος. Κάνε login για να στείλεις στο μοντέλο.", from: 'bot', ts: Date.now() };
+      setTimeout(() => addMessage(conv.id, warn), 0);
       return conv;
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/conversations`, {
+      const res = await fetch(`${CHAT_API_BASE}/api/conversations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -208,17 +184,15 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
       lastCreatedRef.current = conv.id;
       return conv;
     }
-  }, [conversations.length, getUserIdHeader, API_BASE]);
+  }, [conversations.length, getUserIdHeader, CHAT_API_BASE, addMessage]);
 
   const selectConversation = useCallback((id) => {
     setActiveId(id);
   }, []);
 
-  // Clear selection and temporarily suppress auto-select to ensure blank state
   const clearActive = useCallback(() => {
     setActiveId(null);
     setSuppressAutoSelect(true);
-    // release suppression on next tick (same behavior as initial suppression)
     setTimeout(() => setSuppressAutoSelect(false), 0);
   }, []);
 
@@ -230,7 +204,6 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
   const sendUserMessage = useCallback(async (payload) => {
     if (isBusy) return;
 
-    // Ensure there is an active conversation; if not, create one like "+ New Advice".
     let convId = activeId;
     if (!convId) {
       try {
@@ -239,7 +212,7 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
       } catch {
         convId = null;
       }
-      if (!convId) return; // couldn't create conversation
+      if (!convId) return;
     }
 
     const text = typeof payload === 'string' ? payload : (payload?.text ?? JSON.stringify(payload));
@@ -250,12 +223,20 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
 
     const uid = getUserIdHeader();
 
+    // Αν δεν έχουμε userId, μην χτυπήσεις backend — καθαρό μήνυμα
+    if (!uid) {
+      addMessage(convId, { id: Date.now()+1, text: "Δεν είσαι συνδεδεμένος. Κάνε login για να λάβεις απάντηση.", from: 'bot', ts: Date.now() });
+      setIsBusy(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_BASE}/api/conversations/${convId}/messages`, {
+      console.log('[Conversation] POST', `${CHAT_API_BASE}/api/conversations/${convId}/messages`, 'X-User-Id=', uid);
+      const res = await fetch(`${CHAT_API_BASE}/api/conversations/${convId}/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-User-Id": uid || ""
+          "X-User-Id": String(uid)
         },
         body: JSON.stringify({ message: text })
       });
@@ -275,8 +256,8 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
           addMessage(convId, { id: Date.now()+1, text: botText, from: 'bot', ts: Date.now() });
         } else {
           try {
-            const msgsRes = await fetch(`${API_BASE}/api/conversations/${convId}/messages`, {
-              headers: { "X-User-Id": uid || "" }
+            const msgsRes = await fetch(`${CHAT_API_BASE}/api/conversations/${convId}/messages`, {
+              headers: { "X-User-Id": String(uid) }
             });
             if (msgsRes.ok) {
               const msgs = await msgsRes.json();
@@ -299,7 +280,7 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
     } finally {
       setIsBusy(false);
     }
-  }, [activeId, addMessage, isBusy, getUserIdHeader, replaceConversationMessages, API_BASE, newConversation]);
+  }, [activeId, addMessage, isBusy, getUserIdHeader, replaceConversationMessages, CHAT_API_BASE, newConversation]);
 
   const resendAsUser = useCallback((convId, text) => {
     if (!convId || isBusy) return;
@@ -320,7 +301,7 @@ export function ConversationsProvider({ children, resetActiveOnMount = false, us
       isBusy,
       newConversation,
       selectConversation,
-  clearActive,
+      clearActive,
       addMessage,
       sendUserMessage,
       resendAsUser,

@@ -418,6 +418,7 @@ function App() {
   const closeMenu = () => setMenuOpen(false);
 
   const [resetActiveOnEntry, setResetActiveOnEntry] = useState(false);
+  const userIdFromStorage = (typeof localStorage !== 'undefined') ? localStorage.getItem(USER_KEY) : null;
 
   const applyTheme = useCallback((t) => {
     setTheme(t);
@@ -483,7 +484,7 @@ function App() {
   return (
     <div className="app-container">
       {isAuthenticated ? (
-        <ConversationsProvider resetActiveOnMount={resetActiveOnEntry}>
+        <ConversationsProvider resetActiveOnMount={resetActiveOnEntry} userIdProp={userIdFromStorage}>
           <SideMenu isOpen={menuOpen} toggleMenu={toggleMenu} closeMenu={closeMenu} />
           <UserSettings
             userImage={userPic}
@@ -508,6 +509,7 @@ function App() {
             {/* onAuth: set auth token with 2-hour expiration; AuthPage can still set user id */}
             <Route path="/auth" element={<AuthPage setTheme={(t) => applyTheme(t)} onAuth={() => {
               try {
+                localStorage.setItem(USER_KEY, '1');
                 localStorage.setItem(AUTH_TOKEN_KEY, '1');
                 const exp = Date.now() + 2 * 60 * 60 * 1000;
                 localStorage.setItem(AUTH_EXP_KEY, String(exp));
@@ -528,6 +530,7 @@ function App() {
         <Routes>
           <Route path="/auth" element={<AuthPage setTheme={(t) => applyTheme(t)} onAuth={() => {
             try {
+              localStorage.setItem(USER_KEY, '1');
               localStorage.setItem(AUTH_TOKEN_KEY, '1');
               const exp = Date.now() + 2 * 60 * 60 * 1000;
               localStorage.setItem(AUTH_EXP_KEY, String(exp));

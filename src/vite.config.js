@@ -7,12 +7,13 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      // ΟΛΑ τα /api αιτήματα να προωθούνται στο Spring Boot (8081)
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8081',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path
       }
     }
   }
-});
+})
